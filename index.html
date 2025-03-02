@@ -16,12 +16,18 @@
 </head>
 <body>
 
+    <h2>Agregar Supermercado</h2>
+    <input type="text" id="nuevoSupermercado" placeholder="Nombre del supermercado">
+    <button onclick="agregarSupermercado()">Agregar</button>
+
     <h2>Agregar Producto y Precio</h2>
     <div style="position: relative; display: inline-block;">
         <input type="text" id="producto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
         <div id="sugerencias" class="autocomplete-suggestions"></div>
     </div>
-    <input type="text" id="supermercado" placeholder="Supermercado">
+    <select id="supermercado">
+        <option value="" selected>Selecciona un supermercado</option>
+    </select>
     <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
     <button onclick="agregarProducto()">Agregar</button>
 
@@ -39,11 +45,38 @@
     </table>
 
     <script>
-        document.addEventListener("DOMContentLoaded", mostrarPrecios);
+        document.addEventListener("DOMContentLoaded", () => {
+            mostrarPrecios();
+            cargarSupermercados();
+        });
+
+        function agregarSupermercado() {
+            let supermercado = document.getElementById("nuevoSupermercado").value.trim();
+            if (!supermercado) return;
+            let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
+            if (!supermercados.includes(supermercado)) {
+                supermercados.push(supermercado);
+                localStorage.setItem("supermercados", JSON.stringify(supermercados));
+            }
+            document.getElementById("nuevoSupermercado").value = "";
+            cargarSupermercados();
+        }
+
+        function cargarSupermercados() {
+            let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
+            let select = document.getElementById("supermercado");
+            select.innerHTML = "<option value='' selected>Selecciona un supermercado</option>";
+            supermercados.forEach(supermercado => {
+                let option = document.createElement("option");
+                option.value = supermercado;
+                option.textContent = supermercado;
+                select.appendChild(option);
+            });
+        }
 
         function agregarProducto() {
             let producto = document.getElementById("producto").value.trim();
-            let supermercado = document.getElementById("supermercado").value.trim();
+            let supermercado = document.getElementById("supermercado").value;
             let precio = parseFloat(document.getElementById("precio").value);
 
             if (!producto || !supermercado || isNaN(precio) || precio <= 0) {
@@ -57,7 +90,6 @@
             
             mostrarPrecios();
             document.getElementById("producto").value = "";
-            document.getElementById("supermercado").value = "";
             document.getElementById("precio").value = "";
             document.getElementById("sugerencias").innerHTML = "";
         }
