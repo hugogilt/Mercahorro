@@ -44,10 +44,25 @@
         <tbody id="listaPrecios"></tbody>
     </table>
 
+    <h2>Lista de la Compra</h2>
+    <div style="position: relative; display: inline-block;">
+        <input type="text" id="productoLista" placeholder="Nombre del producto" oninput="mostrarSugerenciasLista()">
+        <div id="sugerenciasLista" class="autocomplete-suggestions"></div>
+    </div>
+    <button onclick="agregarListaCompra()">Agregar a la lista</button>
+
+
+    <ul id="listaCompra"></ul>
+    <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
+    <h3 id="resultadoTotal"></h3>
+    <h3 id="resultadoDetalle"></h3>
+    <div id="detalleSupermercados"></div>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             mostrarPrecios();
             cargarSupermercados();
+            mostrarListaCompra();
         });
 
         function agregarSupermercado() {
@@ -136,6 +151,60 @@
                 };
                 sugerenciasDiv.appendChild(div);
             });
+        }
+
+        function mostrarSugerenciasLista() {
+            let input = document.getElementById("productoLista").value.trim().toLowerCase();
+            let sugerenciasDiv = document.getElementById("sugerenciasLista");
+            sugerenciasDiv.innerHTML = "";
+
+            if (!input) return;
+
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosUnicos = [...new Set(lista.map(item => item.producto))];
+            let sugerencias = productosUnicos.filter(producto => producto.toLowerCase().startsWith(input));
+
+            sugerencias.forEach(producto => {
+                let div = document.createElement("div");
+                div.textContent = producto;
+                div.onclick = () => {
+                    document.getElementById("productoLista").value = producto;
+                    sugerenciasDiv.innerHTML = "";
+                };
+                sugerenciasDiv.appendChild(div);
+            });
+        }
+
+        function mostrarListaCompra() {
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            let ul = document.getElementById("listaCompra");
+            ul.innerHTML = "";
+            listaCompra.forEach((producto, index) => {
+                let li = `<li>${producto} <button onclick="eliminarListaCompra(${index})">Eliminar</button></li>`;
+                ul.innerHTML += li;
+            });
+        }
+
+        function calcularPrecios() {
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
+            
+            let supermercados = {};
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+                preciosProducto.forEach(({ supermercado, precio }) => {
+                    if (!supermercados[supermercado]) supermercados[supermercado] = 0;
+                    supermercados[supermercado] += precio;
+                });
+            });
+            
+            let ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
+            
+            if (ordenados.length > 0) {
+                document.getElementById("resultadoTotal").innerText = `Mejor opción: ${ordenados[0][0]} con un total de €${ordenados[0][1].toFixed(2)}`;
+            } else {
+                document.getElementById("resultadoTotal").innerText = "No hay suficientes datos para calcular.";
+            }
         }
     </script>
 
