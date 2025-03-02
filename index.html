@@ -1,19 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparador de Precios</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        input, select, button { margin: 5px; padding: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .autocomplete-suggestions { border: 1px solid #ddd; max-height: 150px; overflow-y: auto; position: absolute; background: white; width: 200px; }
-        .autocomplete-suggestions div { padding: 5px; cursor: pointer; }
-        .autocomplete-suggestions div:hover { background: #f0f0f0; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input,
+        select,
+        button {
+            margin: 5px;
+            padding: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background: white;
+            width: 200px;
+        }
+
+        .autocomplete-suggestions div {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestions div:hover {
+            background: #f0f0f0;
+        }
     </style>
 </head>
+
 <body>
 
     <h2>Agregar Supermercado</h2>
@@ -55,7 +92,6 @@
     <ul id="listaCompra"></ul>
     <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
     <h3 id="resultadoTotal"></h3>
-    <h3 id="resultadoDetalle"></h3>
     <div id="detalleSupermercados"></div>
 
     <script>
@@ -102,7 +138,7 @@
             let lista = JSON.parse(localStorage.getItem("precios")) || [];
             lista.push({ producto, supermercado, precio });
             localStorage.setItem("precios", JSON.stringify(lista));
-            
+
             mostrarPrecios();
             document.getElementById("producto").value = "";
             document.getElementById("precio").value = "";
@@ -145,7 +181,7 @@
             sugerencias.forEach(sugerencia => {
                 let div = document.createElement("div");
                 div.textContent = sugerencia;
-                div.onclick = function() {
+                div.onclick = function () {
                     document.getElementById("producto").value = sugerencia;
                     sugerenciasDiv.innerHTML = "";
                 };
@@ -185,10 +221,32 @@
             });
         }
 
+        function agregarListaCompra() {
+            let producto = document.getElementById("productoLista").value.trim();
+            if (!producto) return;
+
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            if (!listaCompra.includes(producto)) {
+                listaCompra.push(producto);
+                localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+            }
+
+            document.getElementById("productoLista").value = "";
+            document.getElementById("sugerenciasLista").innerHTML = "";
+            mostrarListaCompra();
+        }
+
+        function eliminarListaCompra(index) {
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            listaCompra.splice(index, 1);
+            localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+            mostrarListaCompra();
+        }
+
         function calcularPrecios() {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
-            
+
             let supermercados = {};
             listaCompra.forEach(producto => {
                 let preciosProducto = listaPrecios.filter(item => item.producto === producto);
@@ -197,9 +255,17 @@
                     supermercados[supermercado] += precio;
                 });
             });
-            
+
             let ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
-            
+
+            let detalle = "<h3>Precios por supermercado:</h3><ul>";
+            ordenados.forEach(([supermercado, total]) => {
+                detalle += `<li>${supermercado}: €${total.toFixed(2)}</li>`;
+            });
+            detalle += "</ul>";
+
+            document.getElementById("detalleSupermercados").innerHTML = detalle;
+
             if (ordenados.length > 0) {
                 document.getElementById("resultadoTotal").innerText = `Mejor opción: ${ordenados[0][0]} con un total de €${ordenados[0][1].toFixed(2)}`;
             } else {
@@ -209,4 +275,5 @@
     </script>
 
 </body>
+
 </html>
