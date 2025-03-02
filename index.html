@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Precios</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, select, button { margin: 5px; padding: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .autocomplete-suggestions { border: 1px solid #ddd; max-height: 150px; overflow-y: auto; position: absolute; background: white; width: 200px; }
+        .autocomplete-suggestions div { padding: 5px; cursor: pointer; }
+        .autocomplete-suggestions div:hover { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+
+    <h2>Agregar Producto y Precio</h2>
+    <div style="position: relative; display: inline-block;">
+        <input type="text" id="producto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
+        <div id="sugerencias" class="autocomplete-suggestions"></div>
+    </div>
+    <input type="text" id="supermercado" placeholder="Supermercado">
+    <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
+    <button onclick="agregarProducto()">Agregar</button>
+
+    <h2>Lista de Precios</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Supermercado</th>
+                <th>Precio (€)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="listaPrecios"></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", mostrarPrecios);
+
+        function agregarProducto() {
+            let producto = document.getElementById("producto").value.trim();
+            let supermercado = document.getElementById("supermercado").value.trim();
+            let precio = parseFloat(document.getElementById("precio").value);
+
+            if (!producto || !supermercado || isNaN(precio) || precio <= 0) {
+                alert("Por favor, introduce datos válidos.");
+                return;
+            }
+
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            lista.push({ producto, supermercado, precio });
+            localStorage.setItem("precios", JSON.stringify(lista));
+            
+            mostrarPrecios();
+            document.getElementById("producto").value = "";
+            document.getElementById("supermercado").value = "";
+            document.getElementById("precio").value = "";
+            document.getElementById("sugerencias").innerHTML = "";
+        }
+
+        function mostrarPrecios() {
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let tabla = document.getElementById("listaPrecios");
+            tabla.innerHTML = "";
+
+            lista.forEach((item, index) => {
+                let fila = `<tr>
+                    <td>${item.producto}</td>
+                    <td>${item.supermercado}</td>
+                    <td>${item.precio.toFixed(2)}</td>
+                    <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
+                </tr>`;
+                tabla.innerHTML += fila;
+            });
+        }
+
+        function eliminarProducto(index) {
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            lista.splice(index, 1);
+            localStorage.setItem("precios", JSON.stringify(lista));
+            mostrarPrecios();
+        }
+
+        function mostrarSugerencias() {
+            let input = document.getElementById("producto").value.toLowerCase();
+            let sugerenciasDiv = document.getElementById("sugerencias");
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosUnicos = [...new Set(lista.map(item => item.producto))];
+
+            sugerenciasDiv.innerHTML = "";
+            if (input.length === 0) return;
+
+            let sugerencias = productosUnicos.filter(prod => prod.toLowerCase().startsWith(input)).slice(0, 5);
+            sugerencias.forEach(sugerencia => {
+                let div = document.createElement("div");
+                div.textContent = sugerencia;
+                div.onclick = function() {
+                    document.getElementById("producto").value = sugerencia;
+                    sugerenciasDiv.innerHTML = "";
+                };
+                sugerenciasDiv.appendChild(div);
+            });
+        }
+    </script>
+
+</body>
+</html>
