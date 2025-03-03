@@ -284,24 +284,24 @@
 
             mejoresOpcionesPorSupermercado = calcularMejoresOpcionesPorSupermercado();
 
-            calcularPreciosVariosViajes(); // Para saber el total que se gastaría
+            // Para saber el total que se gastaría
+            calcularPreciosVariosViajes();
+            // Para saber el total que se gastaría en el super que sale más barato
             precioMasBajoUnViaje = encontrarPrecioMasBajoUnViaje(calcularPreciosUnViaje()).precio;
 
-            if (variosSupermercados) {
-                supermercados = calcularPreciosVariosViajes();
-            } else {
-                supermercados = calcularPreciosUnViaje();
-            }
+            //Asigno precios en función de la casilla marcada
+            supermercados = variosSupermercados ? calcularPreciosVariosViajes() : calcularPreciosUnViaje();
 
+            // Ordeno los supermercados de más baratos a más caros
             let ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
 
 
             if (variosSupermercados) {
                 document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
-                document.getElementById("ahorras").innerText = `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje-precioTotal).toFixed(2)}€`
+                document.getElementById("ahorras").innerText = `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`
             } else {
                 document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].toFixed(2)}€` : "No hay suficientes datos para calcular.";
-                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje-precioTotal).toFixed(2)}€`
+                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`
             }
 
             let detalle = "<h3>Precios por supermercado:</h3>";
