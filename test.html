@@ -108,10 +108,12 @@
     <ul id="listaCompra"></ul>
     <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
     <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
-    <h3 id="resultadoTotal"></h3>
-    <h3 id="resultadoDetalle"></h3>
-    <div id="detalleSupermercados"></div>
-    
+    <div id="resultado">
+        <h3 id="resultadoTotal"></h3>
+        <h3 id="ahorras"></h3>
+        <div id="detalleSupermercados"></div>
+    </div>
+
     <div id="modal" class="modal">
         <h3>Productos más baratos en este supermercado</h3>
         <ul id="productosSupermercado"></ul>
@@ -267,86 +269,135 @@
             mostrarListaCompra();
         }
 
+
+        let listaCompra;
+        let listaPrecios;
+        let supermercados;
+        let mejoresOpcionesPorSupermercado;
+        let precioTotal;
+
         function calcularPrecios() {
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
-            let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
+            listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
             let variosSupermercados = document.getElementById("variosSupermercados").checked;
-            
-            let supermercados = {};
-            let mejoresOpciones = {};
-            let mejorPrecioPorProducto = {};
-            let mejorSupermercadoPorProducto = {};
-            
-            listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
-                preciosProducto.forEach(({ supermercado, precio }) => {
-                    if (!mejorPrecioPorProducto[producto] || precio < mejorPrecioPorProducto[producto]) {
-                        mejorPrecioPorProducto[producto] = precio;
-                        mejorSupermercadoPorProducto[producto] = supermercado;
-                    }
-                });
-            });
+            let precioMasBajoUnViaje;
+
+            mejoresOpcionesPorSupermercado = calcularMejoresOpcionesPorSupermercado();
+
+            calcularPreciosVariosViajes(); // Para saber el total que se gastaría
+            precioMasBajoUnViaje = encontrarPrecioMasBajoUnViaje(calcularPreciosUnViaje()).precio;
 
             if (variosSupermercados) {
-                listaCompra.forEach(producto => {
-                let supermercado = mejorSupermercadoPorProducto[producto];
-                let precio = mejorPrecioPorProducto[producto];
-                if (!supermercados[supermercado]) supermercados[supermercado] = 0;
-                supermercados[supermercado] += precio;
-            });
+                supermercados = calcularPreciosVariosViajes();
             } else {
-                listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
-                preciosProducto.forEach(({ supermercado, precio }) => {
-                    if (!supermercados[supermercado]) supermercados[supermercado] = 0;
-                    supermercados[supermercado] += precio;
-                    if (!mejoresOpciones[producto] || precio < mejoresOpciones[producto].precio) {
-                        mejoresOpciones[producto] = { supermercado, precio };
-                    }
-                });
-            });
+                supermercados = calcularPreciosUnViaje();
             }
-            
-            
-            
+
             let ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
+
+
+            if (variosSupermercados) {
+                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
+                document.getElementById("ahorras").innerText = `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje-precioTotal).toFixed(2)}€`
+            } else {
+                document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].toFixed(2)}€` : "No hay suficientes datos para calcular.";
+                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje-precioTotal).toFixed(2)}€`
+            }
+
             let detalle = "<h3>Precios por supermercado:</h3>";
-            
+
             ordenados.forEach(([supermercado, total]) => {
                 if (variosSupermercados) {
                     detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${total.toFixed(2)}</li>`;
                 } else {
                     detalle += `<li>${supermercado}: €${total.toFixed(2)}</li>`;
-                }            });
-            
+                }
+            });
+
             document.getElementById("detalleSupermercados").innerHTML = detalle;
-            document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de €${ordenados[0][1].toFixed(2)}` : "No hay suficientes datos para calcular.";
         }
-        
+
         function mostrarModal(supermercado) {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
             let ul = document.getElementById("productosSupermercado");
             ul.innerHTML = "";
-            
+
             listaCompra.forEach(producto => {
                 let preciosProducto = listaPrecios.filter(item => item.producto === producto);
                 let mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
                 let mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
-                
+
                 if (mejorSuper === supermercado) {
                     let li = document.createElement("li");
                     li.textContent = producto;
                     ul.appendChild(li);
                 }
             });
-            
+
             document.getElementById("modal").classList.add("active");
         }
-        
+
         function cerrarModal() {
             document.getElementById("modal").classList.remove("active");
         }
+
+        function calcularPreciosUnViaje() {
+            supermercados = {};
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+                preciosProducto.forEach(({ supermercado, precio }) => {
+                    if (!supermercados[supermercado]) supermercados[supermercado] = 0;
+                    supermercados[supermercado] += precio;
+                });
+            });
+            return supermercados;
+        }
+
+        function calcularPreciosVariosViajes() {
+            supermercados = {};
+            precioTotal = 0;
+            Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio }]) => {
+                if (!supermercados[supermercado]) {
+                    supermercados[supermercado] = 0;
+                }
+                supermercados[supermercado] += precio;
+                precioTotal += parseFloat(precio);
+            });
+            return supermercados;
+        }
+
+        function calcularMejoresOpcionesPorSupermercado() {
+            mejoresOpcionesPorSupermercado = {};
+
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+
+                preciosProducto.forEach(({ supermercado, precio }) => {
+                    if (!mejoresOpcionesPorSupermercado[producto] || precio < mejoresOpcionesPorSupermercado[producto].precio) {
+                        mejoresOpcionesPorSupermercado[producto] = { supermercado, precio };
+                    }
+                });
+            });
+
+            return mejoresOpcionesPorSupermercado;
+        }
+
+        function encontrarPrecioMasBajoUnViaje(supermercados) {
+            let supermercadoMasBarato = null;
+            let precioMasBajo = Infinity;
+
+            Object.entries(supermercados).forEach(([supermercado, precio]) => {
+                if (precio < precioMasBajo) {
+                    precioMasBajo = precio;
+                    supermercadoMasBarato = supermercado;
+                }
+            });
+
+            return { supermercado: supermercadoMasBarato, precio: precioMasBajo };
+        }
+
+
     </script>
 
 </body>
