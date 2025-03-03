@@ -48,6 +48,22 @@
         .autocomplete-suggestions div:hover {
             background: #f0f0f0;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal.active {
+            display: block;
+        }
     </style>
 </head>
 
@@ -90,9 +106,16 @@
 
 
     <ul id="listaCompra"></ul>
+    <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
     <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
     <h3 id="resultadoTotal"></h3>
+    <h3 id="resultadoDetalle"></h3>
     <div id="detalleSupermercados"></div>
+    <div id="modal" class="modal">
+        <h3 id="modalTitulo"></h3>
+        <ul id="modalLista"></ul>
+        <button onclick="cerrarModal()">Cerrar</button>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -246,24 +269,31 @@
         function calcularPrecios() {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
-
+            let variosSupermercados = document.getElementById("variosSupermercados").checked;
             let supermercados = {};
+            let mejoresOpciones = {};
+
             listaCompra.forEach(producto => {
                 let preciosProducto = listaPrecios.filter(item => item.producto === producto);
                 preciosProducto.forEach(({ supermercado, precio }) => {
                     if (!supermercados[supermercado]) supermercados[supermercado] = 0;
                     supermercados[supermercado] += precio;
+                    if (!mejoresOpciones[producto] || precio < mejoresOpciones[producto].precio) {
+                        mejoresOpciones[producto] = { supermercado, precio };
+                    }
                 });
             });
 
             let ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
-
             let detalle = "<h3>Precios por supermercado:</h3><ul>";
             ordenados.forEach(([supermercado, total]) => {
-                detalle += `<li>${supermercado}: €${total.toFixed(2)}</li>`;
+                if (variosSupermercados) {
+                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${total.toFixed(2)}</li>`;
+                } else {
+                    detalle += `<li>${supermercado}: €${total.toFixed(2)}</li>`;
+                }
             });
             detalle += "</ul>";
-
             document.getElementById("detalleSupermercados").innerHTML = detalle;
 
             if (ordenados.length > 0) {
@@ -271,6 +301,27 @@
             } else {
                 document.getElementById("resultadoTotal").innerText = "No hay suficientes datos para calcular.";
             }
+        }
+
+        function mostrarModal(supermercado) {
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosSuper = listaCompra.filter(producto => {
+                return listaPrecios.some(item => item.producto === producto && item.supermercado === supermercado);
+            });
+            document.getElementById("modalTitulo").innerText = `Productos a comprar en ${supermercado}`;
+            let ul = document.getElementById("modalLista");
+            ul.innerHTML = "";
+            productosSuper.forEach(producto => {
+                let li = document.createElement("li");
+                li.textContent = producto;
+                ul.appendChild(li);
+            });
+            document.getElementById("modal").classList.add("active");
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal").classList.remove("active");
         }
     </script>
 
