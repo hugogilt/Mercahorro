@@ -405,6 +405,47 @@
         .modal button:hover {
             background: #c82333;
         }
+
+        /* Filtros productos */
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filtros input,
+        .filtros select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .producto-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .producto-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+
+        /* Divs Productos */
+        .aldi {
+            background-color: blue;
+        }
+
+        .mercadona {
+            background-color: green;
+        }
     </style>
 </head>
 
@@ -439,8 +480,26 @@
             <button onclick="agregarProducto()">Agregar</button>
 
             <h2>Productos</h2>
+
+            <!-- FILTROS -->
+            <div class="filtros">
+                <input type="text" id="filtroNombre" placeholder="Buscar por nombre" oninput="mostrarListaProductos()">
+                <select id="filtroSupermercado" onchange="mostrarListaProductos()">
+                    <option value="">Todos los supermercados</option>
+                </select>
+                <select id="ordenarPor" onchange="mostrarListaProductos()">
+                    <option value="">Ordenar por...</option>
+                    <option value="nombre">Nombre (A-Z)</option>
+                    <option value="supermercado">Supermercado (A-Z)</option>
+                    <option value="precio-asc">Precio (Menor a Mayor)</option>
+                    <option value="precio-desc">Precio (Mayor a Menor)</option> <!-- Nueva opción -->
+                </select>
+
+            </div>
+
             <div id="productos"></div>
         </div>
+
 
 
         <div id="listaCompraContainer" class="section">
@@ -504,17 +563,47 @@
         }
 
         function cargarSupermercados() {
-            // Esta funcion carga los supermercados guardados en el select de añadir productos
+            //Esta funcion añade los supermercados actuales al select de agregar y filtrar productos
+            // Obtener supermercados guardados
             let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
-            let select = document.getElementById("supermercado");
-            select.innerHTML = "<option value='' selected>Selecciona un supermercado</option>";
+
+            // Referencias a los select
+            let selectAgregar = document.getElementById("supermercado");
+            let selectFiltro = document.getElementById("filtroSupermercado");
+
+            // Crear fragmentos para evitar múltiples reflow/repaints en el DOM
+            let fragmentAgregar = document.createDocumentFragment();
+            let fragmentFiltro = document.createDocumentFragment();
+
+            // Opción por defecto
+            let opcionAgregar = document.createElement("option");
+            opcionAgregar.value = "";
+            opcionAgregar.textContent = "Selecciona un supermercado";
+            fragmentAgregar.appendChild(opcionAgregar);
+
+            let opcionFiltro = document.createElement("option");
+            opcionFiltro.value = "";
+            opcionFiltro.textContent = "Todos los supermercados";
+            fragmentFiltro.appendChild(opcionFiltro);
+
+            // Añadir supermercados
             supermercados.forEach(supermercado => {
-                let option = document.createElement("option");
-                option.value = supermercado;
-                option.textContent = supermercado;
-                select.appendChild(option);
+                let optionAgregar = document.createElement("option");
+                optionAgregar.value = supermercado;
+                optionAgregar.textContent = supermercado;
+                fragmentAgregar.appendChild(optionAgregar);
+
+                let optionFiltro = document.createElement("option");
+                optionFiltro.value = supermercado;
+                optionFiltro.textContent = supermercado;
+                fragmentFiltro.appendChild(optionFiltro);
             });
+
+            // Reemplazar hijos de los select con los nuevos fragmentos
+            selectAgregar.replaceChildren(fragmentAgregar);
+            selectFiltro.replaceChildren(fragmentFiltro);
         }
+
 
         function agregarProducto() {
             let producto = document.getElementById("producto").value.trim();
@@ -540,25 +629,69 @@
 
         function mostrarListaProductos() {
             let lista = JSON.parse(localStorage.getItem("precios")) || [];
-            let contenedor = document.getElementById("productos");
+            let productosContainer = document.getElementById("productos");
 
-            // Limpiar el contenedor antes de agregar nuevos elementos
-            contenedor.innerHTML = "";
+            // Filtros
+            let filtroNombre = document.getElementById("filtroNombre").value.toLowerCase();
+            let filtroSupermercado = document.getElementById("filtroSupermercado").value;
+            let orden = document.getElementById("ordenarPor").value;
 
-            lista.forEach((item, index) => {
-                let productoCard = document.createElement("div");
-                productoCard.classList.add("producto-card");
+            // Aplicar filtros
+            let productosFiltrados = lista.filter(item =>
+                item.producto.toLowerCase().includes(filtroNombre) &&
+                (filtroSupermercado === "" || item.supermercado === filtroSupermercado)
+            );
 
-                productoCard.innerHTML = `
-            <h3>${item.producto}</h3>
-            <p><strong>Supermercado:</strong> ${item.supermercado}</p>
-            <p><strong>Precio:</strong> €${item.precio.toFixed(2)}</p>
-            <button onclick="eliminarProducto(${index})">Eliminar</button>
-        `;
+            // Aplicar ordenación
+            if (orden === "nombre") {
+                productosFiltrados.sort((a, b) => a.producto.localeCompare(b.producto));
+            } else if (orden === "supermercado") {
+                productosFiltrados.sort((a, b) => a.supermercado.localeCompare(b.supermercado));
+            } else if (orden === "precio-asc") {
+                productosFiltrados.sort((a, b) => a.precio - b.precio); // Menor a mayor
+            } else if (orden === "precio-desc") {
+                productosFiltrados.sort((a, b) => b.precio - a.precio); // Mayor a menor
+            }
 
-                contenedor.appendChild(productoCard);
+            // Limpiar el contenedor antes de renderizar
+            productosContainer.textContent = "";
+
+            // Renderizar productos
+            productosFiltrados.forEach((item, index) => {
+                let productoDiv = document.createElement("div");
+                productoDiv.classList.add("producto-item");
+
+                // Agregar clase con el nombre del supermercado en minúsculas (sin espacios)
+                productoDiv.classList.add(item.supermercado.replace(/\s+/g, '').toLowerCase());
+
+
+                let nombreProducto = document.createElement("p");
+                nombreProducto.innerHTML = `<strong>${item.producto}</strong>`;
+
+                let supermercado = document.createElement("p");
+                supermercado.textContent = `Supermercado: ${item.supermercado}`;
+
+                let precio = document.createElement("p");
+                precio.textContent = `Precio: ${item.precio.toFixed(2)}€`;
+
+                let botonEliminar = document.createElement("button");
+                botonEliminar.textContent = "Eliminar";
+                botonEliminar.addEventListener("click", () => eliminarProducto(index));
+
+                // Añadir elementos al div del producto
+                productoDiv.appendChild(nombreProducto);
+                productoDiv.appendChild(supermercado);
+                productoDiv.appendChild(precio);
+                productoDiv.appendChild(botonEliminar);
+
+                // Agregar producto al contenedor
+                productosContainer.appendChild(productoDiv);
             });
         }
+
+
+
+
 
 
         function mostrarSeccion(sectionId) {
