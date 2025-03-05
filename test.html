@@ -6,9 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparador de Precios</title>
     <style>
+        * {
+            box-sizing: border-box;
+
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+        }
+
+        header {
+            background-color: green;
+            display: block;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            padding: 0 1rem 1rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 3rem;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        nav div {
+            display: flex;
+            justify-content: center;
+            width: 33%;
+            background-color: rgba(125, 125, 125, 0.8);
+            padding: 1em;
+            cursor: pointer;
+        }
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         input,
@@ -64,68 +108,91 @@
         .modal.active {
             display: block;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
+    <header>
+        <h1>Mercahorro</h1>
+        <nav>
+            <div id="listaNav">Lista de la compra</div>
+            <div id="productosNav">Productos</div>
+            <div id="supermercadosNav">Supermercados</div>
+        </nav>
+    </header>
+    <main>
+        <div id="supermercadosContainer" class="hidden section">
+            <h2>Agregar Supermercado</h2>
+            <input type="text" id="nuevoSupermercado" placeholder="Nombre del supermercado">
+            <button onclick="agregarSupermercado()">Agregar</button>
+            <h2>Supermercados</h2>
+            <ul></ul>
+        </div>
 
-    <h2>Agregar Supermercado</h2>
-    <input type="text" id="nuevoSupermercado" placeholder="Nombre del supermercado">
-    <button onclick="agregarSupermercado()">Agregar</button>
+        <div id="productosContainer" class="hidden section">
+            <h2>Agregar Producto y Precio</h2>
+            <div style="position: relative; display: inline-block;">
+                <input type="text" id="producto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
+                <div id="sugerencias" class="autocomplete-suggestions"></div>
+            </div>
+            <select id="supermercado">
+                <option value="" selected>Selecciona un supermercado</option>
+            </select>
+            <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
+            <button onclick="agregarProducto()">Agregar</button>
 
-    <h2>Agregar Producto y Precio</h2>
-    <div style="position: relative; display: inline-block;">
-        <input type="text" id="producto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
-        <div id="sugerencias" class="autocomplete-suggestions"></div>
-    </div>
-    <select id="supermercado">
-        <option value="" selected>Selecciona un supermercado</option>
-    </select>
-    <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
-    <button onclick="agregarProducto()">Agregar</button>
+            <h2>Productos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Supermercado</th>
+                        <th>Precio (€)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPrecios"></tbody>
+            </table>
+        </div>
 
-    <h2>Lista de Precios</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Supermercado</th>
-                <th>Precio (€)</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="listaPrecios"></tbody>
-    </table>
-
-    <h2>Lista de la Compra</h2>
-    <div style="position: relative; display: inline-block;">
-        <input type="text" id="productoLista" placeholder="Nombre del producto" oninput="mostrarSugerenciasLista()">
-        <div id="sugerenciasLista" class="autocomplete-suggestions"></div>
-    </div>
-    <button onclick="agregarListaCompra()">Agregar a la lista</button>
+        <div id="listaCompraContainer" class="section">
+            <h2>Lista de la Compra</h2>
+            <div style="position: relative; display: inline-block;">
+                <input type="text" id="productoLista" placeholder="Nombre del producto"
+                    oninput="mostrarSugerenciasLista()">
+                <div id="sugerenciasLista" class="autocomplete-suggestions"></div>
+            </div>
+            <button onclick="agregarListaCompra()">Agregar a la lista</button>
 
 
-    <ul id="listaCompra"></ul>
-    <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
-    <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
-    <div id="resultado">
-        <h3 id="resultadoTotal"></h3>
-        <h3 id="ahorras"></h3>
-        <div id="detalleSupermercados"></div>
-    </div>
+            <ul id="listaCompra"></ul>
+            <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
+            <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
+            <div id="resultado">
+                <h3 id="resultadoTotal"></h3>
+                <h3 id="ahorras"></h3>
+                <div id="detalleSupermercados"></div>
+            </div>
 
-    <div id="modal" class="modal">
-        <h3>Productos más baratos en este supermercado</h3>
-        <ul id="productosSupermercado"></ul>
-        <button onclick="cerrarModal()">Cerrar</button>
-    </div>
-
+            <div id="modal" class="modal">
+                <h3>Productos más baratos en este supermercado</h3>
+                <ul id="productosSupermercado"></ul>
+                <button onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </main>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            mostrarPrecios();
-            cargarSupermercados();
             mostrarListaCompra();
         });
+
+        document.getElementById('productosNav').addEventListener('click', mostrarSeccionProductos);
+        document.getElementById('supermercadosNav').addEventListener('click', mostrarSeccionSupermercados);
+        document.getElementById('listaNav').addEventListener('click', mostrarSeccionListaCompra);
 
         function agregarSupermercado() {
             let supermercado = document.getElementById("nuevoSupermercado").value.trim();
@@ -136,7 +203,7 @@
                 localStorage.setItem("supermercados", JSON.stringify(supermercados));
             }
             document.getElementById("nuevoSupermercado").value = "";
-            cargarSupermercados();
+            mostrarListaSupermercados();
         }
 
         function cargarSupermercados() {
@@ -165,25 +232,121 @@
             lista.push({ producto, supermercado, precio });
             localStorage.setItem("precios", JSON.stringify(lista));
 
-            mostrarPrecios();
+            mostrarListaProductos();
             document.getElementById("producto").value = "";
             document.getElementById("precio").value = "";
             document.getElementById("sugerencias").innerHTML = "";
         }
 
-        function mostrarPrecios() {
+        function mostrarListaProductos() {
+            // Usando innerHTML:
+            // let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            // let tabla = document.getElementById("listaPrecios");
+            // tabla.innerHTML = "";
+
+            // lista.forEach((item, index) => {
+            //     let fila = `<tr>
+            //         <td>${item.producto}</td>
+            //         <td>${item.supermercado}</td>
+            //         <td>${item.precio.toFixed(2)}</td>
+            //         <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
+            //     </tr>`;
+            //     tabla.innerHTML += fila;
+            // });
+
+            // Sin usar innerHTML:
             let lista = JSON.parse(localStorage.getItem("precios")) || [];
             let tabla = document.getElementById("listaPrecios");
-            tabla.innerHTML = "";
+
+            // Eliminar todas las filas previas
+            while (tabla.firstChild) {
+                tabla.removeChild(tabla.firstChild);
+            }
 
             lista.forEach((item, index) => {
-                let fila = `<tr>
-                    <td>${item.producto}</td>
-                    <td>${item.supermercado}</td>
-                    <td>${item.precio.toFixed(2)}</td>
-                    <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
-                </tr>`;
-                tabla.innerHTML += fila;
+                let fila = document.createElement("tr");
+
+                let tdProducto = document.createElement("td");
+                tdProducto.textContent = item.producto;
+
+                let tdSupermercado = document.createElement("td");
+                tdSupermercado.textContent = item.supermercado;
+
+                let tdPrecio = document.createElement("td");
+                tdPrecio.textContent = item.precio.toFixed(2);
+
+                let tdEliminar = document.createElement("td");
+                let botonEliminar = document.createElement("button");
+                botonEliminar.textContent = "Eliminar";
+                botonEliminar.onclick = () => eliminarProducto(index);
+
+                tdEliminar.appendChild(botonEliminar);
+
+                fila.appendChild(tdProducto);
+                fila.appendChild(tdSupermercado);
+                fila.appendChild(tdPrecio);
+                fila.appendChild(tdEliminar);
+
+                tabla.appendChild(fila);
+            });
+        }
+
+        function mostrarSeccionProductos() {
+            let allSections = document.querySelectorAll('.section');
+            for (let section of allSections) {
+                if (section.id !== 'productosContainer') {
+                    section.classList.add('hidden');
+                } else {
+                    section.classList.remove('hidden');
+                }
+            }
+            mostrarListaProductos();
+            cargarSupermercados();
+        }
+
+        function mostrarSeccionSupermercados() {
+            let allSections = document.querySelectorAll('.section');
+            for (let section of allSections) {
+                if (section.id !== 'supermercadosContainer') {
+                    section.classList.add('hidden');
+                } else {
+                    section.classList.remove('hidden');
+                }
+            }
+            mostrarListaSupermercados();
+        }
+
+        function mostrarSeccionListaCompra() {
+            let allSections = document.querySelectorAll('.section');
+            for (let section of allSections) {
+                if (section.id !== 'listaCompraContainer') {
+                    section.classList.add('hidden');
+                } else {
+                    section.classList.remove('hidden');
+                }
+            }
+            // Mientras no se pueda añadir productos a la lista desde otra sección
+            // esto no sería necesario;
+            // mostrarListaCompra();
+        }
+
+        function mostrarListaSupermercados() {
+            let lista = JSON.parse(localStorage.getItem("supermercados")) || [];
+            let ul = document.querySelector("#supermercadosContainer ul");
+
+            //Limpiamos la lista
+            while (ul.firstChild) {
+                ul.removeChild(ul.firstChild);
+            }
+
+            lista.forEach((item, index) => {
+                let li = document.createElement('li');
+                li.textContent = item;
+                let eliminarSupermercadoBtn = document.createElement('button');
+                eliminarSupermercadoBtn.textContent = 'Eliminar';
+                eliminarSupermercadoBtn.onclick = () => eliminarSupermercado(index);
+                ul.appendChild(li);
+                li.appendChild(eliminarSupermercadoBtn);
             });
         }
 
@@ -191,7 +354,14 @@
             let lista = JSON.parse(localStorage.getItem("precios")) || [];
             lista.splice(index, 1);
             localStorage.setItem("precios", JSON.stringify(lista));
-            mostrarPrecios();
+            mostrarListaProductos();
+        }
+
+        function eliminarSupermercado(index) {
+            let lista = JSON.parse(localStorage.getItem("supermercados")) || [];
+            lista.splice(index, 1);
+            localStorage.setItem("supermercados", JSON.stringify(lista));
+            mostrarListaSupermercados();
         }
 
         function mostrarSugerencias() {
@@ -396,6 +566,8 @@
 
             return { supermercado: supermercadoMasBarato, precio: precioMasBajo };
         }
+
+
 
 
     </script>
