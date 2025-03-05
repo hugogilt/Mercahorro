@@ -446,6 +446,13 @@
         .mercadona {
             background-color: green;
         }
+
+
+        /* Cantidades modal */
+        #productosSupermercado li {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
@@ -511,7 +518,6 @@
             </div>
             <button onclick="agregarListaCompra()">Agregar a la lista</button>
 
-
             <ul id="listaCompra"></ul>
             <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
             <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
@@ -520,8 +526,8 @@
                 <h3 id="ahorras"></h3>
                 <div id="detalleSupermercados"></div>
             </div>
-
         </div>
+
 
         <div id="modal" class="modal">
             <h3>Productos más baratos en este supermercado</h3>
@@ -795,36 +801,92 @@
             });
         }
 
+        // Mostrar lista de productos con cantidades
         function mostrarListaCompra() {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let ul = document.getElementById("listaCompra");
             ul.innerHTML = "";
+
+            // Mostrar cada producto con sus botones de + y - para la cantidad
             listaCompra.forEach((producto, index) => {
-                let li = `<li>${producto} <button onclick="eliminarListaCompra(${index})">Eliminar</button></li>`;
-                ul.innerHTML += li;
+                let li = document.createElement("li");
+
+                // Nombre del producto
+                let nombreProducto = document.createElement("span");
+                nombreProducto.textContent = `${producto.nombre}`;
+
+                // Contador de cantidad
+                let cantidad = document.createElement("span");
+                cantidad.textContent = ` (Cantidad: ${producto.cantidad})`;
+
+                // Botones de cantidad
+                let btnDisminuir = document.createElement("button");
+                btnDisminuir.textContent = "-";
+                btnDisminuir.onclick = () => modificarCantidad(index, -1);
+
+                let btnAumentar = document.createElement("button");
+                btnAumentar.textContent = "+";
+                btnAumentar.onclick = () => modificarCantidad(index, 1);
+
+                // Botón de eliminar
+                let btnEliminar = document.createElement("button");
+                btnEliminar.textContent = "Eliminar";
+                btnEliminar.onclick = () => eliminarListaCompra(index);
+
+                // Añadir los elementos al <li>
+                li.appendChild(nombreProducto);
+                li.appendChild(cantidad);
+                li.appendChild(btnDisminuir);
+                li.appendChild(btnAumentar);
+                li.appendChild(btnEliminar);
+
+                ul.appendChild(li);
             });
         }
 
+        // Función para agregar un producto a la lista
         function agregarListaCompra() {
             let producto = document.getElementById("productoLista").value.trim();
             if (!producto) return;
 
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
-            if (!listaCompra.includes(producto)) {
-                listaCompra.push(producto);
-                localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+
+            // Comprobar si el producto ya existe en la lista
+            let productoExistente = listaCompra.find(item => item.nombre.toLowerCase() === producto.toLowerCase());
+            if (productoExistente) {
+                // Si el producto ya existe, solo aumentar la cantidad
+                productoExistente.cantidad++;
+            } else {
+                // Si el producto no existe, agregarlo con cantidad 1
+                listaCompra.push({ nombre: producto, cantidad: 1 });
             }
+
+            localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
 
             document.getElementById("productoLista").value = "";
             document.getElementById("sugerenciasLista").innerHTML = "";
             mostrarListaCompra();
         }
 
+        // Función para eliminar un producto de la lista
         function eliminarListaCompra(index) {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             listaCompra.splice(index, 1);
             localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
             mostrarListaCompra();
+        }
+
+        // Función para modificar la cantidad de un producto
+        function modificarCantidad(index, cambio) {
+            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            let producto = listaCompra[index];
+
+            // Si el cambio es negativo y la cantidad es 1 o más, disminuir
+            if (producto.cantidad + cambio > 0) {
+                producto.cantidad += cambio;
+                localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+                mostrarListaCompra();
+            }
         }
 
 
@@ -882,14 +944,20 @@
             ul.innerHTML = "";
 
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+                debugger;
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
                 let mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
                 let mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
 
                 if (mejorSuper === supermercado) {
-                    let li = document.createElement("li");
-                    li.textContent = producto;
-                    ul.appendChild(li);
+                    let liNombre = document.createElement("li");
+                    let spanCantidad = document.createElement('span');
+                    spanCantidad.id = 'spanCantidad'
+                    let cantidad = listaCompra.find(item => item.nombre === producto.nombre)?.cantidad || 1;
+                    liNombre.textContent = producto.nombre;
+                    spanCantidad.textContent = 'X' +cantidad;
+                    ul.appendChild(liNombre);
+                    liNombre.appendChild(spanCantidad);
                 }
             });
 
@@ -901,39 +969,43 @@
         }
 
         function calcularPreciosUnViaje() {
-            supermercados = {};
+            let supermercados = {};
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
                 preciosProducto.forEach(({ supermercado, precio }) => {
+                    let cantidad = producto.cantidad || 1; // Usar la cantidad almacenada en el producto
                     if (!supermercados[supermercado]) supermercados[supermercado] = 0;
-                    supermercados[supermercado] += precio;
+                    supermercados[supermercado] += precio * cantidad; // Multiplicar por la cantidad
                 });
             });
             return supermercados;
         }
 
+
         function calcularPreciosVariosViajes() {
             supermercados = {};
             precioTotal = 0;
+            debugger;
             Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio }]) => {
                 if (!supermercados[supermercado]) {
                     supermercados[supermercado] = 0;
                 }
-                supermercados[supermercado] += precio;
-                precioTotal += parseFloat(precio);
+                let cantidad = listaCompra.find(item => item.nombre === producto)?.cantidad || 1;
+                let precioASumar = precio * cantidad;
+                supermercados[supermercado] += precioASumar;
+                precioTotal += parseFloat(precioASumar);
             });
             return supermercados;
         }
 
         function calcularMejoresOpcionesPorSupermercado() {
             mejoresOpcionesPorSupermercado = {};
-
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto);
+                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
 
                 preciosProducto.forEach(({ supermercado, precio }) => {
-                    if (!mejoresOpcionesPorSupermercado[producto] || precio < mejoresOpcionesPorSupermercado[producto].precio) {
-                        mejoresOpcionesPorSupermercado[producto] = { supermercado, precio };
+                    if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
+                        mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio };
                     }
                 });
             });
