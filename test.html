@@ -46,7 +46,27 @@
             background-color: rgba(125, 125, 125, 0.8);
             padding: 1em;
             cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
+
+        nav div:hover {
+            background-color: rgba(100, 100, 100, 0.9);
+        }
+
+        nav div:active {
+            background-color: rgba(80, 80, 80, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
+
+        nav div.selected {
+            background-color: rgba(80, 80, 80, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            transform: translateY(2px);
+        }
+
 
         main {
             display: flex;
@@ -112,7 +132,7 @@
             display: none;
         }
 
-        /* Lista de la compra */
+        /* Lista de la compra CHATGPT */
         #listaCompraContainer {
             max-width: 500px;
             margin: 20px auto;
@@ -211,7 +231,7 @@
         }
 
 
-        /* Productos */
+        /* Productos CHATGPT*/
         #productos {
             display: flex;
             flex-wrap: wrap;
@@ -255,7 +275,7 @@
         }
 
 
-        /* Supermercados */
+        /* Supermercados CHATGPT*/
         #supermercadosContainer {
             max-width: 400px;
             margin: 20px auto;
@@ -327,7 +347,7 @@
         }
 
 
-        /* Modal */
+        /* Modal CHATGPT*/
         /* Fondo del modal (oscurece el fondo al abrirse) */
         /* .modal {
             display: none;
@@ -440,11 +460,16 @@
 
         /* Divs Productos */
         .aldi {
-            background-color: blue;
+            background-color: #1F2A77;
         }
 
         .mercadona {
-            background-color: green;
+            background-color: #00915D;
+        }
+
+        .mercadona,
+        .aldi {
+            color: white;
         }
 
 
@@ -460,7 +485,7 @@
     <header>
         <h1>Mercahorro</h1>
         <nav>
-            <div id="listaNav">Lista de la compra</div>
+            <div id="listaNav" class="selected">Lista de la compra</div>
             <div id="productosNav">Productos</div>
             <div id="supermercadosNav">Supermercados</div>
         </nav>
@@ -709,6 +734,13 @@
                     section.classList.remove('hidden');
                 }
             }
+            let allNavs = document.querySelectorAll('nav div');
+            for (let n of allNavs) {
+                n.classList.remove('selected');
+            }
+            let navId = sectionId.match(/^[a-z]+/)[0] + "Nav";
+            let nav = document.getElementById(navId);
+            nav.classList.add('selected');
         }
 
 
@@ -944,7 +976,6 @@
             ul.innerHTML = "";
 
             listaCompra.forEach(producto => {
-                debugger;
                 let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
                 let mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
                 let mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
@@ -955,7 +986,7 @@
                     spanCantidad.id = 'spanCantidad'
                     let cantidad = listaCompra.find(item => item.nombre === producto.nombre)?.cantidad || 1;
                     liNombre.textContent = producto.nombre;
-                    spanCantidad.textContent = 'X' +cantidad;
+                    spanCantidad.textContent = 'X' + cantidad;
                     ul.appendChild(liNombre);
                     liNombre.appendChild(spanCantidad);
                 }
@@ -985,7 +1016,6 @@
         function calcularPreciosVariosViajes() {
             supermercados = {};
             precioTotal = 0;
-            debugger;
             Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio }]) => {
                 if (!supermercados[supermercado]) {
                     supermercados[supermercado] = 0;
