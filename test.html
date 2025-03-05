@@ -18,7 +18,6 @@
 
         header {
             background-color: green;
-            display: block;
             width: 100%;
             display: flex;
             justify-content: center;
@@ -190,9 +189,21 @@
             mostrarListaCompra();
         });
 
-        document.getElementById('productosNav').addEventListener('click', mostrarSeccionProductos);
-        document.getElementById('supermercadosNav').addEventListener('click', mostrarSeccionSupermercados);
-        document.getElementById('listaNav').addEventListener('click', mostrarSeccionListaCompra);
+        document.getElementById('productosNav').addEventListener('click', () => {
+            mostrarSeccion('productosContainer');
+            mostrarListaProductos();
+            cargarSupermercados();
+        });
+        document.getElementById('supermercadosNav').addEventListener('click', () => {
+            mostrarSeccion('supermercadosContainer');
+            mostrarListaSupermercados();
+        });
+        document.getElementById('listaNav').addEventListener('click', () => {
+            mostrarSeccion('listaCompraContainer');
+            // Mientras no se pueda añadir productos a la lista desde otra sección
+            // esto no sería necesario;
+            // mostrarListaCompra();
+        });
 
         function agregarSupermercado() {
             let supermercado = document.getElementById("nuevoSupermercado").value.trim();
@@ -207,6 +218,7 @@
         }
 
         function cargarSupermercados() {
+            // Esta funcion carga los supermercados guardados en el select de añadir productos
             let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
             let select = document.getElementById("supermercado");
             select.innerHTML = "<option value='' selected>Selecciona un supermercado</option>";
@@ -278,7 +290,7 @@
                 let tdEliminar = document.createElement("td");
                 let botonEliminar = document.createElement("button");
                 botonEliminar.textContent = "Eliminar";
-                botonEliminar.onclick = () => eliminarProducto(index);
+                // botonEliminar.onclick = () => eliminarProducto(index);
 
                 tdEliminar.appendChild(botonEliminar);
 
@@ -291,44 +303,17 @@
             });
         }
 
-        function mostrarSeccionProductos() {
+        function mostrarSeccion(sectionId) {
             let allSections = document.querySelectorAll('.section');
             for (let section of allSections) {
-                if (section.id !== 'productosContainer') {
+                if (section.id !== sectionId) {
                     section.classList.add('hidden');
                 } else {
                     section.classList.remove('hidden');
                 }
             }
-            mostrarListaProductos();
-            cargarSupermercados();
         }
 
-        function mostrarSeccionSupermercados() {
-            let allSections = document.querySelectorAll('.section');
-            for (let section of allSections) {
-                if (section.id !== 'supermercadosContainer') {
-                    section.classList.add('hidden');
-                } else {
-                    section.classList.remove('hidden');
-                }
-            }
-            mostrarListaSupermercados();
-        }
-
-        function mostrarSeccionListaCompra() {
-            let allSections = document.querySelectorAll('.section');
-            for (let section of allSections) {
-                if (section.id !== 'listaCompraContainer') {
-                    section.classList.add('hidden');
-                } else {
-                    section.classList.remove('hidden');
-                }
-            }
-            // Mientras no se pueda añadir productos a la lista desde otra sección
-            // esto no sería necesario;
-            // mostrarListaCompra();
-        }
 
         function mostrarListaSupermercados() {
             let lista = JSON.parse(localStorage.getItem("supermercados")) || [];
@@ -344,7 +329,18 @@
                 li.textContent = item;
                 let eliminarSupermercadoBtn = document.createElement('button');
                 eliminarSupermercadoBtn.textContent = 'Eliminar';
-                eliminarSupermercadoBtn.onclick = () => eliminarSupermercado(index);
+
+                // Detectar a que botón de eliminar se pulsa en lugar de asignar un evento a cada uno:
+                li.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'BUTTON') {
+                        let index = Array.from(e.target.parentElement.parentElement.children).indexOf(e.target.parentElement);
+                        eliminarSupermercado(index);
+                    }
+                });
+                //Asignar un evento distinto a cada uno (código peor):
+                // eliminarSupermercadoBtn.onclick = () => eliminarSupermercado(index);
+
+
                 ul.appendChild(li);
                 li.appendChild(eliminarSupermercadoBtn);
             });
@@ -364,6 +360,7 @@
             mostrarListaSupermercados();
         }
 
+        // TOFIX: Si clico fuera de la sugerencia que se cierre, fusionar ambas funciones
         function mostrarSugerencias() {
             let input = document.getElementById("producto").value.toLowerCase();
             let sugerenciasDiv = document.getElementById("sugerencias");
