@@ -111,6 +111,300 @@
         .hidden {
             display: none;
         }
+
+        /* Lista de la compra */
+        #listaCompraContainer {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #listaCompraContainer h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #listaCompraContainer input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #listaCompraContainer button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+
+        #listaCompraContainer button:hover {
+            background: #0056b3;
+        }
+
+        #listaCompra {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        #listaCompra li {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #listaCompra li button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #listaCompra li button:hover {
+            background: #c82333;
+        }
+
+        #variosSupermercados {
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        #resultado h3 {
+            margin: 10px 0;
+            color: #28a745;
+        }
+
+        #detalleSupermercados {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+
+        /* Productos */
+        #productos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .producto-card {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .producto-card h3 {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .producto-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .producto-card button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .producto-card button:hover {
+            background: #c0392b;
+        }
+
+
+        /* Supermercados */
+        #supermercadosContainer {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #supermercadosContainer h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #nuevoSupermercado {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #supermercadosContainer button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #supermercadosContainer button:hover {
+            background: #218838;
+        }
+
+        #supermercadosContainer ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        #supermercadosContainer ul li {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #supermercadosContainer ul li button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #supermercadosContainer ul li button:hover {
+            background: #c82333;
+        }
+
+
+        /* Modal */
+        /* Fondo del modal (oscurece el fondo al abrirse) */
+        /* .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        } */
+
+        /* Contenedor del modal */
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Animación de aparición */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Título del modal */
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Lista de productos */
+        #productosSupermercado {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        #productosSupermercado li {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        /* Botón de cerrar */
+        .modal button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .modal button:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 
@@ -145,18 +439,9 @@
             <button onclick="agregarProducto()">Agregar</button>
 
             <h2>Productos</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Supermercado</th>
-                        <th>Precio (€)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaPrecios"></tbody>
-            </table>
+            <div id="productos"></div>
         </div>
+
 
         <div id="listaCompraContainer" class="section">
             <h2>Lista de la Compra</h2>
@@ -177,11 +462,12 @@
                 <div id="detalleSupermercados"></div>
             </div>
 
-            <div id="modal" class="modal">
-                <h3>Productos más baratos en este supermercado</h3>
-                <ul id="productosSupermercado"></ul>
-                <button onclick="cerrarModal()">Cerrar</button>
-            </div>
+        </div>
+
+        <div id="modal" class="modal">
+            <h3>Productos más baratos en este supermercado</h3>
+            <ul id="productosSupermercado"></ul>
+            <button onclick="cerrarModal()">Cerrar</button>
         </div>
     </main>
     <script>
@@ -245,63 +531,35 @@
             localStorage.setItem("precios", JSON.stringify(lista));
 
             mostrarListaProductos();
+
+            // Limpiar los campos después de agregar
             document.getElementById("producto").value = "";
             document.getElementById("precio").value = "";
             document.getElementById("sugerencias").innerHTML = "";
         }
 
         function mostrarListaProductos() {
-            // Usando innerHTML:
-            // let lista = JSON.parse(localStorage.getItem("precios")) || [];
-            // let tabla = document.getElementById("listaPrecios");
-            // tabla.innerHTML = "";
-
-            // lista.forEach((item, index) => {
-            //     let fila = `<tr>
-            //         <td>${item.producto}</td>
-            //         <td>${item.supermercado}</td>
-            //         <td>${item.precio.toFixed(2)}</td>
-            //         <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
-            //     </tr>`;
-            //     tabla.innerHTML += fila;
-            // });
-
-            // Sin usar innerHTML:
             let lista = JSON.parse(localStorage.getItem("precios")) || [];
-            let tabla = document.getElementById("listaPrecios");
+            let contenedor = document.getElementById("productos");
 
-            // Eliminar todas las filas previas
-            while (tabla.firstChild) {
-                tabla.removeChild(tabla.firstChild);
-            }
+            // Limpiar el contenedor antes de agregar nuevos elementos
+            contenedor.innerHTML = "";
 
             lista.forEach((item, index) => {
-                let fila = document.createElement("tr");
+                let productoCard = document.createElement("div");
+                productoCard.classList.add("producto-card");
 
-                let tdProducto = document.createElement("td");
-                tdProducto.textContent = item.producto;
+                productoCard.innerHTML = `
+            <h3>${item.producto}</h3>
+            <p><strong>Supermercado:</strong> ${item.supermercado}</p>
+            <p><strong>Precio:</strong> €${item.precio.toFixed(2)}</p>
+            <button onclick="eliminarProducto(${index})">Eliminar</button>
+        `;
 
-                let tdSupermercado = document.createElement("td");
-                tdSupermercado.textContent = item.supermercado;
-
-                let tdPrecio = document.createElement("td");
-                tdPrecio.textContent = item.precio.toFixed(2);
-
-                let tdEliminar = document.createElement("td");
-                let botonEliminar = document.createElement("button");
-                botonEliminar.textContent = "Eliminar";
-                // botonEliminar.onclick = () => eliminarProducto(index);
-
-                tdEliminar.appendChild(botonEliminar);
-
-                fila.appendChild(tdProducto);
-                fila.appendChild(tdSupermercado);
-                fila.appendChild(tdPrecio);
-                fila.appendChild(tdEliminar);
-
-                tabla.appendChild(fila);
+                contenedor.appendChild(productoCard);
             });
         }
+
 
         function mostrarSeccion(sectionId) {
             let allSections = document.querySelectorAll('.section');
