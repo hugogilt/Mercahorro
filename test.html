@@ -483,9 +483,6 @@
         #listaCompraContainer .divCantidades {
             margin-left: auto;
         }
-
-
-
     </style>
 </head>
 
@@ -589,6 +586,10 @@
             // mostrarListaCompra();
         });
 
+        let supermercadosAñadidos = obtenerSupermercadosAñadidos();
+        let listaProductos = obtenerProductosAñadidos();
+
+
         function agregarSupermercado() {
             let supermercado = document.getElementById("nuevoSupermercado").value.trim();
             if (!supermercado) return;
@@ -603,9 +604,6 @@
 
         function cargarSupermercados() {
             //Esta funcion añade los supermercados actuales al select de agregar y filtrar productos
-            // Obtener supermercados guardados
-            let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
-
             // Referencias a los select
             let selectAgregar = document.getElementById("supermercado");
             let selectFiltro = document.getElementById("filtroSupermercado");
@@ -626,7 +624,7 @@
             fragmentFiltro.appendChild(opcionFiltro);
 
             // Añadir supermercados
-            supermercados.forEach(supermercado => {
+            supermercadosAñadidos.forEach(supermercado => {
                 let optionAgregar = document.createElement("option");
                 optionAgregar.value = supermercado;
                 optionAgregar.textContent = supermercado;
@@ -749,6 +747,13 @@
             let navId = sectionId.match(/^[a-z]+/)[0] + "Nav";
             let nav = document.getElementById(navId);
             nav.classList.add('selected');
+
+            if (sectionId !== 'supermercadosContainer') {
+                supermercadosAñadidos = obtenerSupermercadosAñadidos();
+            } 
+            if (sectionId !== 'productosContainer') {
+                listaProductos = obtenerProductosAñadidos();
+            }
         }
 
 
@@ -889,10 +894,33 @@
             });
         }
 
+        let obligacionVariosViajes = false;
+        let casillaVariosViajes = document.getElementById("variosSupermercados");
+        let productoConAlerta = null;
         // Función para agregar un producto a la lista
         function agregarListaCompra() {
             let producto = document.getElementById("productoLista").value.trim();
             if (!producto) return;
+
+            // Comprueba en cuantos supermercados hemos añadido ese producto
+            let contadorSupermercados = 0;
+            for (let productoLista of listaProductos) {
+                if (productoLista.producto === producto) {
+                    console.log(productoLista);
+                    contadorSupermercados += 1;
+                }
+            }
+
+            if (contadorSupermercados === 0) {
+                alert('Ese producto no está en la lista');
+                return;
+            } else if (contadorSupermercados < supermercadosAñadidos.length) {
+                alert('Ese producto no está en todos los supermercados, deberás hacer varios viajes.');
+                obligacionVariosViajes = true;
+                productoConAlerta = producto;
+                casillaVariosViajes.click;
+                casillaVariosViajes.disabled = true;
+            }
 
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
@@ -915,7 +943,12 @@
 
         // Función para eliminar un producto de la lista
         function eliminarListaCompra(index) {
+            debugger;
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            if (listaCompra[index].nombre === productoConAlerta) {
+                // alert('quito la alerta');
+                casillaVariosViajes.disabled = false;
+            }
             listaCompra.splice(index, 1);
             localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
             mostrarListaCompra();
@@ -936,15 +969,13 @@
 
 
         let listaCompra;
-        let listaPrecios;
         let supermercados;
         let mejoresOpcionesPorSupermercado;
         let precioTotal;
 
         function calcularPrecios() {
             listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
-            listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
-            let variosSupermercados = document.getElementById("variosSupermercados").checked;
+            let variosSupermercados = casillaVariosViajes.checked;
             let precioMasBajoUnViaje;
 
             mejoresOpcionesPorSupermercado = calcularMejoresOpcionesPorSupermercado();
@@ -984,12 +1015,11 @@
 
         function mostrarModal(supermercado) {
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
-            let listaPrecios = JSON.parse(localStorage.getItem("precios")) || [];
             let ul = document.getElementById("productosSupermercado");
             ul.innerHTML = "";
 
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
                 let mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
                 let mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
 
@@ -1015,7 +1045,7 @@
         function calcularPreciosUnViaje() {
             let supermercados = {};
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
                 preciosProducto.forEach(({ supermercado, precio }) => {
                     let cantidad = producto.cantidad || 1; // Usar la cantidad almacenada en el producto
                     if (!supermercados[supermercado]) supermercados[supermercado] = 0;
@@ -1044,7 +1074,7 @@
         function calcularMejoresOpcionesPorSupermercado() {
             mejoresOpcionesPorSupermercado = {};
             listaCompra.forEach(producto => {
-                let preciosProducto = listaPrecios.filter(item => item.producto === producto.nombre);
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
 
                 preciosProducto.forEach(({ supermercado, precio }) => {
                     if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
@@ -1071,7 +1101,13 @@
         }
 
 
+        function obtenerSupermercadosAñadidos() {
+            return JSON.parse(localStorage.getItem("supermercados")) || [];
+        }
 
+        function obtenerProductosAñadidos() {
+            return JSON.parse(localStorage.getItem("precios")) || [];
+        }
 
     </script>
 
