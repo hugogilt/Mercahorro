@@ -483,6 +483,15 @@
         #listaCompraContainer .divCantidades {
             margin-left: auto;
         }
+
+
+
+
+
+
+        #listaCompra .warning {
+            background-color: yellow;
+        }
     </style>
 </head>
 
@@ -581,6 +590,7 @@
         });
         document.getElementById('listaNav').addEventListener('click', () => {
             mostrarSeccion('listaCompraContainer');
+            mostrarListaCompra();
             // Mientras no se pueda añadir productos a la lista desde otra sección
             // esto no sería necesario;
             // mostrarListaCompra();
@@ -588,6 +598,7 @@
 
         let supermercadosAñadidos = obtenerSupermercadosAñadidos();
         let listaProductos = obtenerProductosAñadidos();
+        let casillaVariosViajes = document.getElementById("variosSupermercados");
 
 
         function agregarSupermercado() {
@@ -656,7 +667,21 @@
             lista.push({ producto, supermercado, precio });
             localStorage.setItem("precios", JSON.stringify(lista));
 
+            debugger;
+
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto) + 1;
+            if (contadorSupermercados === supermercadosAñadidos.length) {
+                if (productosConAlerta.includes(producto)) {
+                    let indexProducto = productosConAlerta.indexOf(producto);
+                    if (indexProducto !== -1) {
+                        productosConAlerta.splice(indexProducto, 1);
+                    }
+                }
+            }
+
             mostrarListaProductos();
+            limpiarResultado();
+
 
             // Limpiar los campos después de agregar
             document.getElementById("producto").value = "";
@@ -750,7 +775,7 @@
 
             if (sectionId !== 'supermercadosContainer') {
                 supermercadosAñadidos = obtenerSupermercadosAñadidos();
-            } 
+            }
             if (sectionId !== 'productosContainer') {
                 listaProductos = obtenerProductosAñadidos();
             }
@@ -793,6 +818,7 @@
             lista.splice(index, 1);
             localStorage.setItem("precios", JSON.stringify(lista));
             mostrarListaProductos();
+            limpiarResultado();
         }
 
         function eliminarSupermercado(index) {
@@ -852,6 +878,10 @@
             let ul = document.getElementById("listaCompra");
             ul.innerHTML = "";
 
+            if (productosConAlerta.length === 0) {
+                casillaVariosViajes.disabled = false;
+            }
+
             // Mostrar cada producto con sus botones de + y - para la cantidad
             listaCompra.forEach((producto, index) => {
                 let li = document.createElement("li");
@@ -859,6 +889,21 @@
                 // Nombre del producto
                 let nombreProducto = document.createElement("span");
                 nombreProducto.textContent = `${producto.nombre}`;
+                debugger;
+
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto.nombre);
+
+                if (contadorSupermercados < supermercadosAñadidos.length) {
+                    if (!productosConAlerta.includes(producto.nombre)) {
+                        productosConAlerta.push(producto.nombre);
+                    }
+                    casillaVariosViajes.checked = true;
+                    casillaVariosViajes.disabled = true;
+                }
+
+                if (comprobarProductoEnProductosConAlerta(producto.nombre)) {
+                    li.classList.add('warning');
+                }
 
                 let divCantidades = document.createElement('div');
                 divCantidades.classList.add('divCantidades');
@@ -894,32 +939,21 @@
             });
         }
 
-        let obligacionVariosViajes = false;
-        let casillaVariosViajes = document.getElementById("variosSupermercados");
-        let productoConAlerta = null;
+
+        let productosConAlerta = [];
         // Función para agregar un producto a la lista
         function agregarListaCompra() {
             let producto = document.getElementById("productoLista").value.trim();
             if (!producto) return;
 
             // Comprueba en cuantos supermercados hemos añadido ese producto
-            let contadorSupermercados = 0;
-            for (let productoLista of listaProductos) {
-                if (productoLista.producto === producto) {
-                    console.log(productoLista);
-                    contadorSupermercados += 1;
-                }
-            }
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
 
             if (contadorSupermercados === 0) {
                 alert('Ese producto no está en la lista');
                 return;
-            } else if (contadorSupermercados < supermercadosAñadidos.length) {
+            } else if (contadorSupermercados < supermercadosAñadidos.length && productosConAlerta.length === 0) {
                 alert('Ese producto no está en todos los supermercados, deberás hacer varios viajes.');
-                obligacionVariosViajes = true;
-                productoConAlerta = producto;
-                casillaVariosViajes.click;
-                casillaVariosViajes.disabled = true;
             }
 
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
@@ -939,19 +973,26 @@
             document.getElementById("productoLista").value = "";
             document.getElementById("sugerenciasLista").innerHTML = "";
             mostrarListaCompra();
+            limpiarResultado();
         }
 
         // Función para eliminar un producto de la lista
         function eliminarListaCompra(index) {
-            debugger;
             let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
-            if (listaCompra[index].nombre === productoConAlerta) {
+
+            if (comprobarProductoEnProductosConAlerta(listaCompra[index].nombre)) {
                 // alert('quito la alerta');
                 casillaVariosViajes.disabled = false;
+                let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
+                if (indexProducto !== -1) {
+                    productosConAlerta.splice(indexProducto, 1);
+                }
             }
+
             listaCompra.splice(index, 1);
             localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
             mostrarListaCompra();
+            limpiarResultado();
         }
 
         // Función para modificar la cantidad de un producto
@@ -964,6 +1005,8 @@
                 producto.cantidad += cambio;
                 localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
                 mostrarListaCompra();
+            } else {
+                eliminarListaCompra(listaCompra.indexOf(producto));
             }
         }
 
@@ -994,10 +1037,10 @@
 
             if (variosSupermercados) {
                 document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
-                document.getElementById("ahorras").innerText = `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`
+                document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
             } else {
                 document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].toFixed(2)}€` : "No hay suficientes datos para calcular.";
-                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`
+                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`;
             }
 
             let detalle = "<h3>Precios por supermercado:</h3>";
@@ -1108,6 +1151,39 @@
         function obtenerProductosAñadidos() {
             return JSON.parse(localStorage.getItem("precios")) || [];
         }
+
+        function comprobarProductoEnProductosConAlerta(producto) {
+            for (let productoConAlerta of productosConAlerta) {
+                if (productoConAlerta === producto) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function cuantosSupermercadosTienenUnProducto(producto) {
+            // Comprueba en cuantos supermercados hemos añadido ese producto
+            let contadorSupermercados = 0;
+            for (let productoLista of listaProductos) {
+                if (productoLista.producto === producto) {
+                    contadorSupermercados += 1;
+                }
+            }
+
+            return contadorSupermercados;
+        }
+
+        function limpiarResultado() {
+            let elementos = ["resultadoTotal", "ahorras", "detalleSupermercados"];
+
+            elementos.forEach(id => {
+                let elemento = document.getElementById(id);
+                while (elemento.firstChild) {
+                    elemento.removeChild(elemento.firstChild);
+                }
+            });
+        }
+
 
     </script>
 
