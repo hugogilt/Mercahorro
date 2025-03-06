@@ -663,11 +663,29 @@
                 return;
             }
 
-            let lista = JSON.parse(localStorage.getItem("precios")) || [];
-            lista.push({ producto, supermercado, precio });
-            localStorage.setItem("precios", JSON.stringify(lista));
 
-            debugger;
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+
+            // Buscar si el producto ya está en el mismo supermercado
+            let productoExistente = lista.find(item => item.producto === producto && item.supermercado === supermercado);
+
+            if (productoExistente) {
+                if (productoExistente.precio === precio) {
+                    alert("Este producto ya está añadido con el mismo precio.");
+                } else {
+                    alert(`El producto ya existe en ${supermercado}, pero con un precio diferente (${productoExistente.precio}€ en lugar de ${precio}€).`);
+
+                    // Si quisiera cambiar el precio igualmente:
+                    // productoExistente.precio = precio; // Actualizar el precio
+                    // localStorage.setItem("precios", JSON.stringify(lista)); // Guardar los cambios
+                }
+            } else {
+                // Si no existe, añadirlo
+                lista.push({ producto, supermercado, precio });
+                localStorage.setItem("precios", JSON.stringify(lista));
+            }
+
+
 
             let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto) + 1;
             if (contadorSupermercados === supermercadosAñadidos.length) {
