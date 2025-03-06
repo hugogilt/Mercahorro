@@ -132,6 +132,7 @@
             display: none;
         }
 
+        /* ------------------------------------CHAT GPT EMPIEZA---------------------------------- */
         /* Lista de la compra CHATGPT */
         #listaCompraContainer {
             max-width: 500px;
@@ -157,7 +158,7 @@
             margin-bottom: 10px;
         }
 
-        #listaCompraContainer button {
+        #listaCompraContainer button:not(.divCantidades button) {
             background: #007bff;
             color: white;
             border: none;
@@ -169,7 +170,7 @@
             margin: 5px;
         }
 
-        #listaCompraContainer button:hover {
+        #listaCompraContainer button:not(.divCantidades button):hover {
             background: #0056b3;
         }
 
@@ -186,11 +187,10 @@
             margin: 5px 0;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: space-between;
             align-items: center;
         }
 
-        #listaCompra li button {
+        #listaCompra li button.eliminarDeLista {
             background: #dc3545;
             color: white;
             border: none;
@@ -200,7 +200,7 @@
             transition: background 0.3s;
         }
 
-        #listaCompra li button:hover {
+        #listaCompra li button.eliminarDeLista:hover {
             background: #c82333;
         }
 
@@ -457,6 +457,7 @@
             cursor: pointer;
         }
 
+        /* ------------------------------------CHAT GPT ACABA---------------------------------- */
 
         /* Divs Productos */
         .aldi {
@@ -478,6 +479,13 @@
             display: flex;
             justify-content: space-between;
         }
+
+        #listaCompraContainer .divCantidades {
+            margin-left: auto;
+        }
+
+
+
     </style>
 </head>
 
@@ -847,29 +855,34 @@
                 let nombreProducto = document.createElement("span");
                 nombreProducto.textContent = `${producto.nombre}`;
 
+                let divCantidades = document.createElement('div');
+                divCantidades.classList.add('divCantidades');
+
                 // Contador de cantidad
                 let cantidad = document.createElement("span");
-                cantidad.textContent = ` (Cantidad: ${producto.cantidad})`;
+                cantidad.textContent = `${producto.cantidad}`;
 
                 // Botones de cantidad
                 let btnDisminuir = document.createElement("button");
-                btnDisminuir.textContent = "-";
+                btnDisminuir.innerHTML = "&#10134;";
                 btnDisminuir.onclick = () => modificarCantidad(index, -1);
 
                 let btnAumentar = document.createElement("button");
-                btnAumentar.textContent = "+";
+                btnAumentar.innerHTML = "&#10133;";
                 btnAumentar.onclick = () => modificarCantidad(index, 1);
 
                 // Botón de eliminar
                 let btnEliminar = document.createElement("button");
                 btnEliminar.textContent = "Eliminar";
+                btnEliminar.classList.add('eliminarDeLista');
                 btnEliminar.onclick = () => eliminarListaCompra(index);
 
                 // Añadir los elementos al <li>
                 li.appendChild(nombreProducto);
-                li.appendChild(cantidad);
-                li.appendChild(btnDisminuir);
-                li.appendChild(btnAumentar);
+                li.appendChild(divCantidades);
+                divCantidades.appendChild(btnDisminuir);
+                divCantidades.appendChild(cantidad);
+                divCantidades.appendChild(btnAumentar);
                 li.appendChild(btnEliminar);
 
                 ul.appendChild(li);
