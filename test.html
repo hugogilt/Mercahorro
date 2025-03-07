@@ -664,10 +664,8 @@
             }
 
 
-            let lista = JSON.parse(localStorage.getItem("precios")) || [];
-
             // Buscar si el producto ya está en el mismo supermercado
-            let productoExistente = lista.find(item => item.producto === producto && item.supermercado === supermercado);
+            let productoExistente = listaProductos.find(item => item.producto === producto && item.supermercado === supermercado);
 
             if (productoExistente) {
                 if (productoExistente.precio === precio) {
@@ -677,12 +675,12 @@
 
                     // Si quisiera cambiar el precio igualmente:
                     // productoExistente.precio = precio; // Actualizar el precio
-                    // localStorage.setItem("precios", JSON.stringify(lista)); // Guardar los cambios
+                    // localStorage.setItem("precios", JSON.stringify(listaProductos)); // Guardar los cambios
                 }
             } else {
                 // Si no existe, añadirlo
-                lista.push({ producto, supermercado, precio });
-                localStorage.setItem("precios", JSON.stringify(lista));
+                listaProductos.push({ producto, supermercado, precio });
+                localStorage.setItem("precios", JSON.stringify(listaProductos));
             }
 
 
@@ -832,19 +830,36 @@
         }
 
         function eliminarProducto(index) {
-            let lista = JSON.parse(localStorage.getItem("precios")) || [];
-            lista.splice(index, 1);
-            localStorage.setItem("precios", JSON.stringify(lista));
+            listaProductos.splice(index, 1);
+            localStorage.setItem("precios", JSON.stringify(listaProductos));
             mostrarListaProductos();
             limpiarResultado();
         }
 
         function eliminarSupermercado(index) {
-            let lista = JSON.parse(localStorage.getItem("supermercados")) || [];
-            lista.splice(index, 1);
-            localStorage.setItem("supermercados", JSON.stringify(lista));
+            let listaSupermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
+
+            let supermercadoAEliminar = listaSupermercados[index];
+
+            let productoEliminado = false;
+
+            // Recorremos la lista al revés para evitar problemas de cambio de índices
+            for (let i = listaProductos.length - 1; i >= 0; i--) {
+                if (listaProductos[i].supermercado === supermercadoAEliminar) {
+                    if (!productoEliminado) {
+                        alert('Se eliminarán todos los productos asociados a este supermercado.');
+                        productoEliminado = true;
+                    }
+                    eliminarProducto(i); // Eliminamos el producto
+                }
+            }
+
+            // Eliminamos el supermercado de la lista
+            listaSupermercados.splice(index, 1);
+            localStorage.setItem("supermercados", JSON.stringify(listaSupermercados));
             mostrarListaSupermercados();
         }
+
 
         // TOFIX: Si clico fuera de la sugerencia que se cierre, fusionar ambas funciones
         function mostrarSugerencias() {
