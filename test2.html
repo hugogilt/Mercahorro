@@ -688,9 +688,7 @@
                 localStorage.setItem("precios", JSON.stringify(listaProductos));
             }
 
-
-
-            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto) + 1;
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
             if (contadorSupermercados === supermercadosAñadidos.length) {
                 if (productosConAlerta.includes(producto)) {
                     let indexProducto = productosConAlerta.indexOf(producto);
