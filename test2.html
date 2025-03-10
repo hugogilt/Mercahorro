@@ -861,13 +861,11 @@
         }
 
         function eliminarSupermercado(index) {
-            let listaSupermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
-
-            let supermercadoAEliminar = listaSupermercados[index];
+            let supermercadoAEliminar = supermercadosAñadidos[index];
 
             // Eliminamos el supermercado de la lista
-            listaSupermercados.splice(index, 1);
-            localStorage.setItem("supermercados", JSON.stringify(listaSupermercados));
+            supermercadosAñadidos.splice(index, 1);
+            localStorage.setItem("supermercados", JSON.stringify(supermercadosAñadidos));
             mostrarListaSupermercados();
 
             let productoEliminado = false;
@@ -882,6 +880,16 @@
                     eliminarProducto(i); // Eliminamos el producto
                 }
             }
+
+            for (let i = productosConAlerta.length - 1; i >= 0; i--) {
+                let producto = productosConAlerta[i];
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
+
+                if (contadorSupermercados === supermercadosAñadidos.length) {
+                    productosConAlerta.splice(i, 1);
+                }
+            }
+
         }
 
 
@@ -945,7 +953,17 @@
                 // Nombre del producto
                 let nombreProducto = document.createElement("span");
                 nombreProducto.textContent = `${producto.nombre}`;
-                debugger;
+
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto.nombre);
+
+                if (contadorSupermercados < supermercadosAñadidos.length) {
+                    if (!productosConAlerta.includes(producto.nombre)) {
+                        productosConAlerta.push(producto.nombre);
+                    }
+                } // else if (!comprobarProductoEnProductosConAlerta(producto.nombre)) {
+                //     let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
+                //     productosConAlerta.splice(indexProducto);
+                // }
 
                 if (comprobarProductoEnProductosConAlerta(producto.nombre)) {
                     li.classList.add('warning');
@@ -953,17 +971,6 @@
                     casillaVariosViajes.disabled = true;
                 }
 
-                // let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto.nombre);
-
-                // if (contadorSupermercados < supermercadosAñadidos.length) {
-
-                //     li.classList.add('warning');
-                //     casillaVariosViajes.checked = true;
-                //     casillaVariosViajes.disabled = true;
-                // } else if (!comprobarProductoEnProductosConAlerta(producto.nombre)) {
-                //     let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
-                //     productosConAlerta.splice(indexProducto);
-                // }
                 let divCantidades = document.createElement('div');
                 divCantidades.classList.add('divCantidades');
 
