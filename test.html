@@ -599,6 +599,7 @@
         let supermercadosAñadidos = obtenerSupermercadosAñadidos();
         let listaProductos = obtenerProductosAñadidos();
         let casillaVariosViajes = document.getElementById("variosSupermercados");
+        let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
 
         function agregarSupermercado() {
@@ -610,6 +611,10 @@
                 localStorage.setItem("supermercados", JSON.stringify(supermercados));
             }
             document.getElementById("nuevoSupermercado").value = "";
+
+            for (let producto of listaCompra) {
+                productosConAlerta.push(producto.nombre);
+            }
             mostrarListaSupermercados();
         }
 
@@ -683,9 +688,7 @@
                 localStorage.setItem("precios", JSON.stringify(listaProductos));
             }
 
-
-
-            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto) + 1;
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
             if (contadorSupermercados === supermercadosAñadidos.length) {
                 if (productosConAlerta.includes(producto)) {
                     let indexProducto = productosConAlerta.indexOf(producto);
@@ -830,16 +833,38 @@
         }
 
         function eliminarProducto(index) {
+            const nombreProducto = listaProductos[index].producto;
+            for (let index = 0; index < listaCompra.length; index++) {
+                const element = listaCompra[index];
+                // Si el producto que elimino está en la lista de la compra...
+                if (element.nombre === nombreProducto) {
+                    productosConAlerta.push(nombreProducto);
+                }
+            }
+
             listaProductos.splice(index, 1);
             localStorage.setItem("precios", JSON.stringify(listaProductos));
+
+
+            // Si no queda en ningún supermercado debo eliminarlo de la lista avisando al cliente
+            let numeroSupermercados = cuantosSupermercadosTienenUnProducto(nombreProducto);
+            if (numeroSupermercados === 0) {
+                alert('Se eliminará este producto de la lista de la compra');
+                eliminarListaCompra(listaCompra.findIndex(item => item.nombre === nombreProducto));
+            }
+
             mostrarListaProductos();
             limpiarResultado();
+
         }
 
         function eliminarSupermercado(index) {
-            let listaSupermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
+            let supermercadoAEliminar = supermercadosAñadidos[index];
 
-            let supermercadoAEliminar = listaSupermercados[index];
+            // Eliminamos el supermercado de la lista
+            supermercadosAñadidos.splice(index, 1);
+            localStorage.setItem("supermercados", JSON.stringify(supermercadosAñadidos));
+            mostrarListaSupermercados();
 
             let productoEliminado = false;
 
@@ -854,10 +879,15 @@
                 }
             }
 
-            // Eliminamos el supermercado de la lista
-            listaSupermercados.splice(index, 1);
-            localStorage.setItem("supermercados", JSON.stringify(listaSupermercados));
-            mostrarListaSupermercados();
+            for (let i = productosConAlerta.length - 1; i >= 0; i--) {
+                let producto = productosConAlerta[i];
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
+
+                if (contadorSupermercados === supermercadosAñadidos.length) {
+                    productosConAlerta.splice(i, 1);
+                }
+            }
+
         }
 
 
@@ -907,7 +937,6 @@
 
         // Mostrar lista de productos con cantidades
         function mostrarListaCompra() {
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let ul = document.getElementById("listaCompra");
             ul.innerHTML = "";
 
@@ -922,7 +951,6 @@
                 // Nombre del producto
                 let nombreProducto = document.createElement("span");
                 nombreProducto.textContent = `${producto.nombre}`;
-                debugger;
 
                 let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto.nombre);
 
@@ -930,12 +958,15 @@
                     if (!productosConAlerta.includes(producto.nombre)) {
                         productosConAlerta.push(producto.nombre);
                     }
-                    casillaVariosViajes.checked = true;
-                    casillaVariosViajes.disabled = true;
-                }
+                } // else if (!comprobarProductoEnProductosConAlerta(producto.nombre)) {
+                //     let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
+                //     productosConAlerta.splice(indexProducto);
+                // }
 
                 if (comprobarProductoEnProductosConAlerta(producto.nombre)) {
                     li.classList.add('warning');
+                    casillaVariosViajes.checked = true;
+                    casillaVariosViajes.disabled = true;
                 }
 
                 let divCantidades = document.createElement('div');
@@ -985,11 +1016,16 @@
             if (contadorSupermercados === 0) {
                 alert('Ese producto no está en la lista');
                 return;
-            } else if (contadorSupermercados < supermercadosAñadidos.length && productosConAlerta.length === 0) {
-                alert('Ese producto no está en todos los supermercados, deberás hacer varios viajes.');
+            } else if (contadorSupermercados < supermercadosAñadidos.length) {
+                if (productosConAlerta.length === 0) {
+                    alert('Ese producto no está en todos los supermercados, deberás hacer varios viajes.');
+                }
+                if (!productosConAlerta.includes(producto)) {
+                    productosConAlerta.push(producto);
+                }
             }
 
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+            listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
             // Comprobar si el producto ya existe en la lista
             let productoExistente = listaCompra.find(item => item.nombre.toLowerCase() === producto.toLowerCase());
@@ -1011,7 +1047,6 @@
 
         // Función para eliminar un producto de la lista
         function eliminarListaCompra(index) {
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
             if (comprobarProductoEnProductosConAlerta(listaCompra[index].nombre)) {
                 // alert('quito la alerta');
@@ -1030,7 +1065,6 @@
 
         // Función para modificar la cantidad de un producto
         function modificarCantidad(index, cambio) {
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let producto = listaCompra[index];
 
             // Si el cambio es negativo y la cantidad es 1 o más, disminuir
@@ -1044,13 +1078,11 @@
         }
 
 
-        let listaCompra;
         let supermercados;
         let mejoresOpcionesPorSupermercado;
         let precioTotal;
 
         function calcularPrecios() {
-            listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let variosSupermercados = casillaVariosViajes.checked;
             let precioMasBajoUnViaje;
 
@@ -1090,7 +1122,6 @@
         }
 
         function mostrarModal(supermercado) {
-            let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
             let ul = document.getElementById("productosSupermercado");
             ul.innerHTML = "";
 
