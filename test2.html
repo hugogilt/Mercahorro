@@ -611,6 +611,10 @@
                 localStorage.setItem("supermercados", JSON.stringify(supermercados));
             }
             document.getElementById("nuevoSupermercado").value = "";
+
+            for (let producto of listaCompra) {
+                productosConAlerta.push(producto.nombre);
+            }
             mostrarListaSupermercados();
         }
 
