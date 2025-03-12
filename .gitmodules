@@ -1,0 +1,3 @@
+[submodule "test_db_supermarkets"]
+	path = test_db_supermarkets
+	url = https://github.com/hugogilt/test_db_supermarkets.git
