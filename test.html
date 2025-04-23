@@ -842,20 +842,20 @@
                 const element = listaCompra[index];
                 // Si el producto que elimino está en la lista de la compra...
                 if (element.nombre === nombreProducto) {
-                    productosConAlerta.push(nombreProducto);
+                    if (!productosConAlerta.includes(nombreProducto)) {
+                        productosConAlerta.push(nombreProducto);
+                    }
+                    // Si no queda en ningún supermercado debo eliminarlo de la lista avisando al cliente
+                    let numeroSupermercados = cuantosSupermercadosTienenUnProducto(nombreProducto) - 1;
+                    if (numeroSupermercados <= 0) {
+                        alert('Se eliminará este producto de la lista de la compra');
+                        eliminarListaCompra(listaCompra.findIndex(item => item.nombre === nombreProducto));
+                    }
                 }
             }
 
             listaProductos.splice(index, 1);
             localStorage.setItem("precios", JSON.stringify(listaProductos));
-
-
-            // Si no queda en ningún supermercado debo eliminarlo de la lista avisando al cliente
-            let numeroSupermercados = cuantosSupermercadosTienenUnProducto(nombreProducto);
-            if (numeroSupermercados === 0) {
-                alert('Se eliminará este producto de la lista de la compra');
-                eliminarListaCompra(listaCompra.findIndex(item => item.nombre === nombreProducto));
-            }
 
             mostrarListaProductos();
             limpiarResultado();
