@@ -527,6 +527,7 @@
                 <option value="" selected>Selecciona un supermercado</option>
             </select>
             <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
+            <input type="number" id="peso" placeholder="Peso (Kg/L)" step="0.10">
             <button onclick="agregarProducto()">Agregar</button>
 
             <h2>Productos</h2>
@@ -666,8 +667,10 @@
             let producto = document.getElementById("producto").value.trim();
             let supermercado = document.getElementById("supermercado").value;
             let precio = parseFloat(document.getElementById("precio").value);
+            let peso = parseFloat(document.getElementById("peso").value);
+            let precioPorPeso = precio / peso;
 
-            if (!producto || !supermercado || isNaN(precio) || precio <= 0) {
+            if (!producto || !supermercado || isNaN(precio) || precio <= 0 || isNaN(peso) || peso <= 0) {
                 alert("Por favor, introduce datos válidos.");
                 return;
             }
@@ -677,18 +680,23 @@
             let productoExistente = listaProductos.find(item => item.producto === producto && item.supermercado === supermercado);
 
             if (productoExistente) {
-                if (productoExistente.precio === precio) {
-                    alert("Este producto ya está añadido con el mismo precio.");
+                let mismoPrecio = productoExistente.precio === precio;
+                let mismoPeso = productoExistente.peso === peso
+                if (mismoPeso || mismoPrecio) {
+                    alert("Este producto ya está añadido con el mismo precio o peso.");
                 } else {
-                    alert(`El producto ya existe en ${supermercado}, pero con un precio diferente (${productoExistente.precio}€ en lugar de ${precio}€).`);
+                    alert(`El producto ya existe en ${supermercado}, pero con un precio o peso diferente (${productoExistente.precio}€ en lugar de ${precio}€ y ${productoExistente.peso}Kg/L en lugar de ${peso}Kg/L).`);
 
                     // Si quisiera cambiar el precio igualmente:
                     // productoExistente.precio = precio; // Actualizar el precio
                     // localStorage.setItem("precios", JSON.stringify(listaProductos)); // Guardar los cambios
+
+                    //Si quisiera cambiar el peso igualmente:
+                    // Pendiente.
                 }
             } else {
                 // Si no existe, añadirlo
-                listaProductos.push({ producto, supermercado, precio });
+                listaProductos.push({ producto, supermercado, precio, peso, precioPorPeso });
                 localStorage.setItem("precios", JSON.stringify(listaProductos));
             }
 
@@ -709,6 +717,7 @@
             // Limpiar los campos después de agregar
             document.getElementById("producto").value = "";
             document.getElementById("precio").value = "";
+            document.getElementById("peso").value = "";
             document.getElementById("sugerencias").innerHTML = "";
         }
 
@@ -759,6 +768,12 @@
                 let precio = document.createElement("p");
                 precio.textContent = `Precio: ${item.precio.toFixed(2)}€`;
 
+                let peso = document.createElement("p");
+                peso.textContent = `Peso: ${item.peso.toFixed(2)}Kg/L`;
+
+                let precioPorPeso = document.createElement("p");
+                precioPorPeso.textContent = `Precio por Kg/L: ${item.precioPorPeso.toFixed(2)}€`;
+
                 let botonEliminar = document.createElement("button");
                 botonEliminar.textContent = "Eliminar";
                 botonEliminar.addEventListener("click", () => eliminarProducto(index));
@@ -767,6 +782,8 @@
                 productoDiv.appendChild(nombreProducto);
                 productoDiv.appendChild(supermercado);
                 productoDiv.appendChild(precio);
+                productoDiv.appendChild(peso);
+                productoDiv.appendChild(precioPorPeso);
                 productoDiv.appendChild(botonEliminar);
 
                 // Agregar producto al contenedor
