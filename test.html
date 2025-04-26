@@ -564,6 +564,7 @@
 
             <ul id="listaCompra"></ul>
             <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
+            <input type="checkbox" id="considerarPrecioPeso"> Soy una rata
             <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
             <div id="resultado">
                 <h3 id="resultadoTotal"></h3>
@@ -604,6 +605,7 @@
         let supermercadosAñadidos = obtenerSupermercadosAñadidos();
         let listaProductos = obtenerProductosAñadidos();
         let casillaVariosViajes = document.getElementById("variosSupermercados");
+        let considerarPrecioPeso = document.getElementById("considerarPrecioPeso");
         let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
 
@@ -1102,6 +1104,7 @@
         let supermercados;
         let mejoresOpcionesPorSupermercado;
         let precioTotal;
+        let precioPorPesoTotal;
 
         function calcularPrecios() {
             let variosSupermercados = casillaVariosViajes.checked;
@@ -1185,17 +1188,27 @@
 
 
         function calcularPreciosVariosViajes() {
-            supermercados = {};
+            supermercados = [];
             precioTotal = 0;
-            Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio }]) => {
-                if (!supermercados[supermercado]) {
-                    supermercados[supermercado] = 0;
-                }
-                let cantidad = listaCompra.find(item => item.nombre === producto)?.cantidad || 1;
-                let precioASumar = precio * cantidad;
-                supermercados[supermercado] += precioASumar;
-                precioTotal += parseFloat(precioASumar);
-            });
+            precioPorPesoTotal = 0;
+
+                Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio, precioPorPeso }]) => {
+                    if (!supermercados[supermercado]) {
+                        supermercados[supermercado] = 0;
+                    }
+                    let cantidad = listaCompra.find(item => item.nombre === producto)?.cantidad || 1;
+                    let precioASumar = precio * cantidad;
+                    // Ya he conseguido calcular el precio por peso ademas del precio normal en un mismo for,
+                    // cuando yo pido el resultado hace la lógica bien pero no muestra bien los totales ni 
+                    // que productos hay que comprar donde porque no estoy ajustando bien esa parte del código al 
+                    // precio real o por peso según corresponda, sobre todo al momento de ver que supermercados muestra
+                    // en hacer varios viajes y al abrir los modales
+                    let precioPorPesoASumar = precioPorPeso * cantidad;
+                    supermercados[supermercado] += precioASumar;
+                    precioTotal += parseFloat(precioASumar);
+                    precioPorPesoTotal += parseFloat(precioPorPesoASumar);
+                });
+        
             return supermercados;
         }
 
@@ -1204,13 +1217,19 @@
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
 
-                preciosProducto.forEach(({ supermercado, precio }) => {
-                    if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
-                        mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio };
+                preciosProducto.forEach(({ supermercado, precio, precioPorPeso }) => {
+                    if (!considerarPrecioPeso.checked) {
+                        if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, precioPorPeso };
+                        }
+                    } else {
+                        if (!mejoresOpcionesPorSupermercado[producto.nombre] || precioPorPeso < mejoresOpcionesPorSupermercado[producto.nombre].precioPorPeso) {
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, precioPorPeso };
+                        }
                     }
                 });
-            });
 
+            });
             return mejoresOpcionesPorSupermercado;
         }
 
