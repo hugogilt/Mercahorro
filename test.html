@@ -1122,16 +1122,21 @@
 
             // Ordeno los supermercados de más baratos a más caros
             let ordenados;
+            debugger;
             if (considerarPrecioPeso.checked) {
                 ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioPorPeso - b[1].precioPorPeso);
             } else {
-                ordenados = Object.entries(supermercados).sort((a, b) => a[1] - b[1]);
+                ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioNormal - b[1].precioNormal);
             }
             if (variosSupermercados) {
                 document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
                 document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
             } else {
-                document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].toFixed(2)}€` : "No hay suficientes datos para calcular.";
+                if (considerarPrecioPeso.checked) {
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioPorPeso.toFixed(2)}€` : "No hay suficientes datos para calcular.";
+                } else {
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€` : "No hay suficientes datos para calcular.";
+                }
                 document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`;
             }
 
@@ -1185,12 +1190,19 @@
             let supermercados = {};
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
-                preciosProducto.forEach(({ supermercado, precio }) => {
+                preciosProducto.forEach(({ supermercado, precio, precioPorPeso }) => {
                     let cantidad = producto.cantidad || 1; // Usar la cantidad almacenada en el producto
-                    if (!supermercados[supermercado]) supermercados[supermercado] = 0;
-                    supermercados[supermercado] += precio * cantidad; // Multiplicar por la cantidad
+                    if (!supermercados[supermercado]) {
+                        supermercados[supermercado] = {
+                            precioNormal: 0,
+                            precioPorPeso: 0
+                        };
+                    }
+                    supermercados[supermercado].precioNormal += precio * cantidad; // Multiplicar por la cantidad
+                    supermercados[supermercado].precioPorPeso += precioPorPeso * cantidad; // Multiplicar por la cantidad
                 });
             });
+            console.log(supermercados)
             return supermercados;
         }
 
@@ -1214,13 +1226,13 @@
                 // que productos hay que comprar donde porque no estoy ajustando bien esa parte del código al 
                 // precio real o por peso según corresponda, sobre todo al momento de ver que supermercados muestra
                 // en hacer varios viajes y al abrir los modales
-            let precioPorPesoASumar = precioPorPeso * cantidad;
+                let precioPorPesoASumar = precioPorPeso * cantidad;
                 supermercados[supermercado].precioNormal += precioASumar;
                 supermercados[supermercado].precioPorPeso += precioPorPesoASumar;
                 precioTotal += parseFloat(precioASumar);
                 precioPorPesoTotal += parseFloat(precioPorPesoASumar);
             });
-
+            console.log(supermercados)
             return supermercados;
         }
 
@@ -1249,11 +1261,19 @@
             let supermercadoMasBarato = null;
             let precioMasBajo = Infinity;
 
-            Object.entries(supermercados).forEach(([supermercado, precio]) => {
-                if (precio < precioMasBajo) {
+            Object.entries(supermercados).forEach(([supermercado, precio, precioPorPeso]) => {
+                if (considerarPrecioPeso.checked) {
+                    if (precioPorPeso < precioMasBajo) {
+                    precioMasBajo = precioPorPeso;
+                    supermercadoMasBarato = supermercado;
+                }
+                } else {
+                    if (precio < precioMasBajo) {
                     precioMasBajo = precio;
                     supermercadoMasBarato = supermercado;
                 }
+                }
+                
             });
 
             return { supermercado: supermercadoMasBarato, precio: precioMasBajo };
