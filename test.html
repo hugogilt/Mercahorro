@@ -1122,7 +1122,6 @@
 
             // Ordeno los supermercados de más baratos a más caros
             let ordenados;
-            debugger;
             if (considerarPrecioPeso.checked) {
                 ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioPorPeso - b[1].precioPorPeso);
             } else {
@@ -1164,9 +1163,15 @@
 
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
-                let mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
-                let mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
-
+                let mejorPrecio;
+                let mejorSuper;
+                if (considerarPrecioPeso.checked) {
+                    mejorPrecio = Math.min(...preciosProducto.map(item => item.precioPorPeso));
+                    mejorSuper = preciosProducto.find(item => item.precioPorPeso === mejorPrecio).supermercado;
+                } else {
+                    mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
+                    mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
+                }
                 if (mejorSuper === supermercado) {
                     let liNombre = document.createElement("li");
                     let spanCantidad = document.createElement('span');
@@ -1260,20 +1265,20 @@
         function encontrarPrecioMasBajoUnViaje(supermercados) {
             let supermercadoMasBarato = null;
             let precioMasBajo = Infinity;
-
-            Object.entries(supermercados).forEach(([supermercado, precio, precioPorPeso]) => {
-                if (considerarPrecioPeso.checked) {
-                    if (precioPorPeso < precioMasBajo) {
-                    precioMasBajo = precioPorPeso;
-                    supermercadoMasBarato = supermercado;
-                }
+            Object.entries(supermercados).forEach(([supermercado, precios]) => {
+            debugger;
+            if (considerarPrecioPeso.checked) {
+                    if (precios.precioPorPeso < precioMasBajo) {
+                        precioMasBajo = precios.precioPorPeso;
+                        supermercadoMasBarato = supermercado;
+                    }
                 } else {
-                    if (precio < precioMasBajo) {
-                    precioMasBajo = precio;
-                    supermercadoMasBarato = supermercado;
+                    if (precios.precioNormal < precioMasBajo) {
+                        precioMasBajo = precios.precioNormal;
+                        supermercadoMasBarato = supermercado;
+                    }
                 }
-                }
-                
+
             });
 
             return { supermercado: supermercadoMasBarato, precio: precioMasBajo };
