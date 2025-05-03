@@ -1104,6 +1104,7 @@
         let supermercados;
         let mejoresOpcionesPorSupermercado;
         let precioTotal;
+        let pesoTotal;
         let precioPorPesoTotal;
 
         function calcularPrecios() {
@@ -1127,7 +1128,7 @@
                 ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioNormal - b[1].precioNormal);
             }
             if (variosSupermercados) {
-                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
+                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€ y ${(pesoTotal).toFixed(2)}Kg/L (Precio/Kilo: ${(precioTotal/pesoTotal).toFixed(2)}€)`;
                 document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
             } else {
                 if (considerarPrecioPeso.checked) {
@@ -1144,7 +1145,7 @@
                 let totalNormal = total.precioNormal;
                 let totalPeso = total.peso
                 if (variosSupermercados) {
-                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${totalNormal.toFixed(2)}</li>`;
+                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L</li>`;
                 } else {
                     if (considerarPrecioPeso.checked) {
                         detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L | Precio/Kilo: €${(totalNormal/totalPeso).toFixed(2)}</li>`;
@@ -1216,6 +1217,7 @@
         function calcularPreciosVariosViajes() {
             supermercados = {};
             precioTotal = 0;
+            pesoTotal = 0;
             precioPorPesoTotal = 0;
 
             Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio, peso, precioPorPeso }]) => {
@@ -1234,6 +1236,7 @@
                 supermercados[supermercado].precioPorPeso += precioPorPesoASumar;
                 supermercados[supermercado].peso += pesoASumar;
                 precioTotal += parseFloat(precioASumar);
+                pesoTotal += parseFloat(pesoASumar);
                 precioPorPesoTotal += parseFloat(precioPorPesoASumar);
             });
             return supermercados;
@@ -1244,14 +1247,14 @@
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
 
-                preciosProducto.forEach(({ supermercado, precio, precioPorPeso }) => {
+                preciosProducto.forEach(({ supermercado, precio, peso, precioPorPeso }) => {
                     if (!considerarPrecioPeso.checked) {
                         if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
-                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, precioPorPeso };
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, peso, precioPorPeso };
                         }
                     } else {
                         if (!mejoresOpcionesPorSupermercado[producto.nombre] || precioPorPeso < mejoresOpcionesPorSupermercado[producto.nombre].precioPorPeso) {
-                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, precioPorPeso };
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, peso, precioPorPeso };
                         }
                     }
                 });
