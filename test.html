@@ -1130,18 +1130,27 @@
                 document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€`;
                 document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
             } else {
+                if (considerarPrecioPeso.checked) {
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€ y ${ordenados[0][1].peso}Kg/L (Precio/Kilo: €${(ordenados[0][1].precioNormal/ordenados[0][1].peso).toFixed(2)})` : "No hay suficientes datos para calcular.";
+                } else {
                     document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€` : "No hay suficientes datos para calcular.";
-                    document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`;
+                }
+                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`;
             }
 
             let detalle = "<h3>Precios por supermercado:</h3>";
 
             ordenados.forEach(([supermercado, total]) => {
-                total = total.precioNormal
+                let totalNormal = total.precioNormal;
+                let totalPeso = total.peso
                 if (variosSupermercados) {
-                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${total.toFixed(2)}</li>`;
+                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${totalNormal.toFixed(2)}</li>`;
                 } else {
-                    detalle += `<li>${supermercado}: €${total.toFixed(2)}</li>`;
+                    if (considerarPrecioPeso.checked) {
+                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L | Precio/Kilo: €${(totalNormal/totalPeso).toFixed(2)}</li>`;
+                    } else {
+                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)}</li>`;
+                    }
                 }
             });
 
@@ -1186,19 +1195,20 @@
             let supermercados = {};
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
-                preciosProducto.forEach(({ supermercado, precio, precioPorPeso }) => {
+                preciosProducto.forEach(({ supermercado, precio, peso, precioPorPeso }) => {
                     let cantidad = producto.cantidad || 1; // Usar la cantidad almacenada en el producto
                     if (!supermercados[supermercado]) {
                         supermercados[supermercado] = {
                             precioNormal: 0,
-                            precioPorPeso: 0
+                            precioPorPeso: 0,
+                            peso: 0
                         };
                     }
                     supermercados[supermercado].precioNormal += precio * cantidad; // Multiplicar por la cantidad
                     supermercados[supermercado].precioPorPeso += precioPorPeso * cantidad; // Multiplicar por la cantidad
+                    supermercados[supermercado].peso += peso * cantidad; // Multiplicar por la cantidad
                 });
             });
-            console.log(supermercados)
             return supermercados;
         }
 
@@ -1208,27 +1218,24 @@
             precioTotal = 0;
             precioPorPesoTotal = 0;
 
-            Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio, precioPorPeso }]) => {
+            Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio, peso, precioPorPeso }]) => {
                 if (!supermercados[supermercado]) {
                     supermercados[supermercado] = {
                         precioNormal: 0,
-                        precioPorPeso: 0
+                        precioPorPeso: 0,
+                        peso: 0
                     };
                 }
                 let cantidad = listaCompra.find(item => item.nombre === producto)?.cantidad || 1;
                 let precioASumar = precio * cantidad;
-                // Ya he conseguido calcular el precio por peso ademas del precio normal en un mismo for,
-                // cuando yo pido el resultado hace la lógica bien pero no muestra bien los totales ni 
-                // que productos hay que comprar donde porque no estoy ajustando bien esa parte del código al 
-                // precio real o por peso según corresponda, sobre todo al momento de ver que supermercados muestra
-                // en hacer varios viajes y al abrir los modales
                 let precioPorPesoASumar = precioPorPeso * cantidad;
+                let pesoASumar = peso * cantidad;
                 supermercados[supermercado].precioNormal += precioASumar;
                 supermercados[supermercado].precioPorPeso += precioPorPesoASumar;
+                supermercados[supermercado].peso += pesoASumar;
                 precioTotal += parseFloat(precioASumar);
                 precioPorPesoTotal += parseFloat(precioPorPesoASumar);
             });
-            console.log(supermercados)
             return supermercados;
         }
 
