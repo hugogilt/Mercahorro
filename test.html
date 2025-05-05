@@ -675,7 +675,19 @@
         let supermercadosAñadidos = obtenerSupermercadosAñadidos();
         let listaProductos = obtenerProductosAñadidos();
         let casillaVariosViajes = document.getElementById("variosSupermercados");
+        casillaVariosViajes.addEventListener('change', () => {
+            if (resultadoTotal.innerHTML !== '') {
+                limpiarResultado();
+                calcularPrecios();
+            }
+        });
         let considerarPrecioPeso = document.getElementById("considerarPrecioPeso");
+        considerarPrecioPeso.addEventListener('change', () => {
+            if (resultadoTotal.innerHTML !== '') {
+                limpiarResultado();
+                calcularPrecios();
+            }
+        });
         let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
 
 
@@ -1072,11 +1084,23 @@
                 // Botones de cantidad
                 let btnDisminuir = document.createElement("button");
                 btnDisminuir.innerHTML = "&#10134;";
-                btnDisminuir.onclick = () => modificarCantidad(index, -1);
+                btnDisminuir.addEventListener('click', () => {
+                    modificarCantidad(index, -1)
+                    if (resultadoTotal.innerHTML !== '') {
+                        limpiarResultado();
+                        calcularPrecios();
+                    }
+                });
 
                 let btnAumentar = document.createElement("button");
                 btnAumentar.innerHTML = "&#10133;";
-                btnAumentar.onclick = () => modificarCantidad(index, 1);
+                btnAumentar.addEventListener('click', () => {
+                    modificarCantidad(index, 1)
+                    if (resultadoTotal.innerHTML !== '') {
+                        limpiarResultado();
+                        calcularPrecios();
+                    }
+                });
 
                 // Botón de eliminar
                 let btnEliminar = document.createElement("button");
