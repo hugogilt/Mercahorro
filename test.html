@@ -399,13 +399,13 @@
         }
 
         /* Lista de productos */
-        #productosSupermercado {
+        #ticket {
             list-style: none;
             padding: 0;
             margin-bottom: 15px;
         }
 
-        #productosSupermercado li {
+        #ticket li {
             background: #f9f9f9;
             padding: 10px;
             margin: 5px 0;
@@ -416,19 +416,16 @@
 
         /* Botón de cerrar */
         .modal button {
-            background: #dc3545;
-            color: white;
             border: none;
             padding: 10px 15px;
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
+            position: absolute;
+            top: 0;
+            right: 0;
         }
 
-        .modal button:hover {
-            background: #c82333;
-        }
 
         /* Filtros productos */
         .filtros {
@@ -479,7 +476,7 @@
 
 
         /* Cantidades modal */
-        #productosSupermercado li {
+        #ticket li {
             display: flex;
             justify-content: space-between;
         }
@@ -496,6 +493,79 @@
         #listaCompra .warning {
             background-color: yellow;
         }
+
+        /* EMPIEZA CHAT GPT TICKET */
+        #modal-ticket {
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            max-width: 600px;
+        }
+
+        #modal-ticket h2 {
+            display: flex;
+            justify-content: center;
+        }
+
+        #ticket {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #ticket span {
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        #ticket li {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #ccc;
+            padding: 4px 0;
+            padding: 0.5em;
+        }
+
+        #ticket li span {
+            width: 25%;
+            /* Ajusta el ancho según tus columnas */
+            text-align: center;
+        }
+
+        #ticket span:nth-child(1) {
+            font-weight: bold;
+        }
+
+        #ticket span:nth-child(2),
+        #ticket span:nth-child(3),
+        #ticket span:nth-child(4) {
+            font-weight: bold;
+        }
+
+        #ticket li:first-of-type {
+            border-bottom: 2px dashed #000;
+            margin-top: 10px;
+            padding: 1em;
+            background: black;
+            color: white;
+            border-color: white;
+        }
+
+        #ticket li:last-of-type {
+            background: #d9d9d9;
+        }
+
+        #modal-ticket button {
+            padding: 0.1em 0.5em;
+            background: none;
+            font-size: 24px;
+        }
+
+
+        /* ACABA CHAT GPT TICKET */
     </style>
 </head>
 
@@ -574,10 +644,10 @@
         </div>
 
 
-        <div id="modal" class="modal">
-            <h3>Productos más baratos en este supermercado</h3>
-            <ul id="productosSupermercado"></ul>
-            <button onclick="cerrarModal()">Cerrar</button>
+        <div id="modal-ticket" class="modal">
+            <h2></h2>
+            <ul id="ticket"></ul>
+            <button onclick="cerrarModal()">&times;</button>
         </div>
     </main>
     <script>
@@ -1128,11 +1198,11 @@
                 ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioNormal - b[1].precioNormal);
             }
             if (variosSupermercados) {
-                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€ y ${(pesoTotal).toFixed(2)}Kg/L (Precio/Kilo: ${(precioTotal/pesoTotal).toFixed(2)}€)`;
+                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€ y ${(pesoTotal).toFixed(2)}Kg/L (Precio/Kilo: ${(precioTotal / pesoTotal).toFixed(2)}€)`;
                 document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
             } else {
                 if (considerarPrecioPeso.checked) {
-                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€ y ${ordenados[0][1].peso}Kg/L (Precio/Kilo: €${(ordenados[0][1].precioNormal/ordenados[0][1].peso).toFixed(2)})` : "No hay suficientes datos para calcular.";
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€ y ${ordenados[0][1].peso}Kg/L (Precio/Kilo: €${(ordenados[0][1].precioNormal / ordenados[0][1].peso).toFixed(2)})` : "No hay suficientes datos para calcular.";
                 } else {
                     document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€` : "No hay suficientes datos para calcular.";
                 }
@@ -1145,10 +1215,10 @@
                 let totalNormal = total.precioNormal;
                 let totalPeso = total.peso
                 if (variosSupermercados) {
-                    detalle += `<li><button onclick='mostrarModal("${supermercado}")'>${supermercado}</button>: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L</li>`;
+                    detalle += `<li><button onclick="mostrarModal('${supermercado}',${totalNormal})"">${supermercado}</button>: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L</li>`;
                 } else {
                     if (considerarPrecioPeso.checked) {
-                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L | Precio/Kilo: €${(totalNormal/totalPeso).toFixed(2)}</li>`;
+                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L | Precio/Kilo: €${(totalNormal / totalPeso).toFixed(2)}</li>`;
                     } else {
                         detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)}</li>`;
                     }
@@ -1158,14 +1228,31 @@
             document.getElementById("detalleSupermercados").innerHTML = detalle;
         }
 
-        function mostrarModal(supermercado) {
-            let ul = document.getElementById("productosSupermercado");
+        function mostrarModal(supermercado, totalSupermercado) {
+            let ul = document.getElementById("ticket");
             ul.innerHTML = "";
+
+            let h3 = document.querySelector('#modal-ticket h2');
+            h3.textContent = supermercado;
+
+            // Crear encabezado (una sola vez)
+            let encabezado = document.createElement("li");
+            encabezado.innerHTML = `
+                <span><strong>Producto</strong></span>
+                <span><strong>Cant.</strong></span>
+                <span><strong>Unitario</strong></span>
+                <span><strong>Subtotal</strong></span>
+            `;
+            ul.appendChild(encabezado);
+
+            // Declarar total
+            const total = totalSupermercado.toFixed(2);
 
             listaCompra.forEach(producto => {
                 let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
                 let mejorPrecio;
                 let mejorSuper;
+
                 if (considerarPrecioPeso.checked) {
                     mejorPrecio = Math.min(...preciosProducto.map(item => item.precioPorPeso));
                     mejorSuper = preciosProducto.find(item => item.precioPorPeso === mejorPrecio).supermercado;
@@ -1173,23 +1260,42 @@
                     mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
                     mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
                 }
+
                 if (mejorSuper === supermercado) {
-                    let liNombre = document.createElement("li");
-                    let spanCantidad = document.createElement('span');
-                    spanCantidad.id = 'spanCantidad'
+                    let li = document.createElement("li");
+
                     let cantidad = listaCompra.find(item => item.nombre === producto.nombre)?.cantidad || 1;
-                    liNombre.textContent = producto.nombre;
-                    spanCantidad.textContent = 'X' + cantidad;
-                    ul.appendChild(liNombre);
-                    liNombre.appendChild(spanCantidad);
+                    let precioUnitario = preciosProducto.find(item => item.supermercado === supermercado)?.precio || 0;
+                    let subtotal = precioUnitario * cantidad;
+
+
+                    li.innerHTML = `
+                <span>${producto.nombre}</span>
+                <span>X${cantidad}</span>
+                <span>${precioUnitario.toFixed(2)}€</span>
+                <span>${subtotal.toFixed(2)}€</span>
+            `;
+                    ul.appendChild(li);
                 }
             });
 
-            document.getElementById("modal").classList.add("active");
+            // Agregar línea de total
+            let totalRow = document.createElement("li");
+            totalRow.innerHTML = `
+                <span><strong>Total</strong></span>
+                <span></span>
+                <span></span>
+                <span><strong>${total}€</strong></span>
+            `;
+            ul.appendChild(totalRow);
+
+            document.getElementById("modal-ticket").classList.add("active");
         }
 
+
+
         function cerrarModal() {
-            document.getElementById("modal").classList.remove("active");
+            document.getElementById("modal-ticket").classList.remove("active");
         }
 
         function calcularPreciosUnViaje() {
