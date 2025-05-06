@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Precios</title>
+    <style>
+        * {
+            box-sizing: border-box;
+
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        header {
+            background-color: green;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            padding: 0 1rem 1rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 3rem;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        nav div {
+            display: flex;
+            justify-content: center;
+            width: 33%;
+            background-color: rgba(125, 125, 125, 0.8);
+            padding: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        nav div:hover {
+            background-color: rgba(100, 100, 100, 0.9);
+        }
+
+        nav div:active {
+            background-color: rgba(80, 80, 80, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
+
+        nav div.selected {
+            background-color: rgba(80, 80, 80, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            transform: translateY(2px);
+        }
+
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input,
+        select,
+        button {
+            margin: 5px;
+            padding: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            position: absolute;
+            background: white;
+            width: 200px;
+        }
+
+        .autocomplete-suggestions div {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestions div:hover {
+            background: #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #productosContainer {
+            width: 100%;
+        }
+
+        /* ------------------------------------CHAT GPT EMPIEZA---------------------------------- */
+        /* Lista de la compra CHATGPT */
+        #listaCompraContainer {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #listaCompraContainer h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #listaCompraContainer input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #listaCompraContainer button:not(.divCantidades button) {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+
+        #listaCompraContainer button:not(.divCantidades button):hover {
+            background: #0056b3;
+        }
+
+        #listaCompra {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        #listaCompra li {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        #listaCompra li button.eliminarDeLista {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #listaCompra li button.eliminarDeLista:hover {
+            background: #c82333;
+        }
+
+        #variosSupermercados {
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        #resultado h3 {
+            margin: 10px 0;
+            color: #28a745;
+        }
+
+        #detalleSupermercados {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+
+        /* Productos CHATGPT*/
+        #productos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .producto-card {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .producto-card h3 {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .producto-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .producto-card button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .producto-card button:hover {
+            background: #c0392b;
+        }
+
+
+        /* Supermercados CHATGPT*/
+        #supermercadosContainer {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #supermercadosContainer h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #nuevoSupermercado {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        #supermercadosContainer button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #supermercadosContainer button:hover {
+            background: #218838;
+        }
+
+        #supermercadosContainer ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        #supermercadosContainer ul li {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #supermercadosContainer ul li button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #supermercadosContainer ul li button:hover {
+            background: #c82333;
+        }
+
+
+        /* Modal CHATGPT*/
+        /* Fondo del modal (oscurece el fondo al abrirse) */
+        /* .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        } */
+
+        /* Contenedor del modal */
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Animación de aparición */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Título del modal */
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Lista de productos */
+        #ticket {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        #ticket li {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        /* Botón de cerrar */
+        .modal button {
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+
+        /* Filtros productos */
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filtros input,
+        .filtros select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .producto-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .producto-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* ------------------------------------CHAT GPT ACABA---------------------------------- */
+
+        /* Divs Productos */
+        .aldi {
+            background-color: #1F2A77;
+        }
+
+        .mercadona {
+            background-color: #00915D;
+        }
+
+        .mercadona,
+        .aldi {
+            color: white;
+        }
+
+
+        /* Cantidades modal */
+        #ticket li {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #listaCompraContainer .divCantidades {
+            margin-left: auto;
+        }
+
+
+
+
+
+
+        #listaCompra .warning {
+            background-color: yellow;
+        }
+
+        /* EMPIEZA CHAT GPT TICKET */
+        #modal-ticket {
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            max-width: 600px;
+        }
+
+        #modal-ticket h2 {
+            display: flex;
+            justify-content: center;
+        }
+
+        #ticket {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #ticket span {
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        #ticket li {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #ccc;
+            padding: 4px 0;
+            padding: 0.5em;
+        }
+
+        #ticket li span {
+            width: 25%;
+            /* Ajusta el ancho según tus columnas */
+            text-align: center;
+        }
+
+        #ticket span:nth-child(1) {
+            font-weight: bold;
+        }
+
+        #ticket span:nth-child(2),
+        #ticket span:nth-child(3),
+        #ticket span:nth-child(4) {
+            font-weight: bold;
+        }
+
+        #ticket li:first-of-type {
+            border-bottom: 2px dashed #000;
+            margin-top: 10px;
+            padding: 1em;
+            background: black;
+            color: white;
+            border-color: white;
+        }
+
+        #ticket li:last-of-type {
+            background: #d9d9d9;
+        }
+
+        #modal-ticket button {
+            padding: 0.1em 0.5em;
+            background: none;
+            font-size: 24px;
+        }
+
+
+        /* ACABA CHAT GPT TICKET */
+
+        /* ESTILOS PRODUCTOS GPT */
+        .product-card {
+            border: 1px solid #ccc;
+            padding: 12px;
+            margin: 10px;
+            width: 220px;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ACABA ESTILOS PRODUCTOS GPT */
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Mercahorro</h1>
+        <nav>
+            <div id="listaNav" class="selected">Lista de la compra</div>
+            <div id="productosNav">Productos</div>
+            <div id="supermercadosNav">Supermercados</div>
+        </nav>
+    </header>
+    <main>
+        <div id="supermercadosContainer" class="hidden section">
+            <h2>Agregar Supermercado</h2>
+            <input type="text" id="nuevoSupermercado" placeholder="Nombre del supermercado">
+            <button onclick="agregarSupermercado()">Agregar</button>
+            <h2>Supermercados</h2>
+            <ul></ul>
+        </div>
+
+        <div id="productosContainer" class="hidden section">
+            <h2>Agregar Producto y Precio</h2>
+            <div style="position: relative; display: inline-block;">
+                <input type="text" id="producto" placeholder="Nombre del producto" oninput="mostrarSugerencias()">
+                <div id="sugerencias" class="autocomplete-suggestions"></div>
+            </div>
+            <select id="supermercado">
+                <option value="" selected>Selecciona un supermercado</option>
+            </select>
+            <input type="number" id="precio" placeholder="Precio (€)" step="0.01">
+            <input type="number" id="peso" placeholder="Peso (Kg/L)" step="0.10">
+            <button onclick="agregarProducto()">Agregar</button>
+
+            <h2>Productos</h2>
+
+            <!-- FILTROS -->
+            <div class="filtros">
+                <input type="text" id="filtroNombre" placeholder="Buscar por nombre" oninput="mostrarListaProductos()">
+                <select id="filtroSupermercado" onchange="mostrarListaProductos()">
+                    <option value="">Todos los supermercados</option>
+                </select>
+                <select id="ordenarPor" onchange="mostrarListaProductos()">
+                    <option value="">Ordenar por...</option>
+                    <option value="nombre">Nombre (A-Z)</option>
+                    <option value="supermercado">Supermercado (A-Z)</option>
+                    <option value="precio-asc">Precio (Menor a Mayor)</option>
+                    <option value="precio-desc">Precio (Mayor a Menor)</option> <!-- Nueva opción -->
+                </select>
+
+            </div>
+
+            <div id="productos"></div>
+        </div>
+
+
+
+        <div id="listaCompraContainer" class="section">
+            <h2>Lista de la Compra</h2>
+            <div style="position: relative; display: inline-block;">
+                <input type="text" id="productoLista" placeholder="Nombre del producto"
+                    oninput="mostrarSugerenciasLista()">
+                <div id="sugerenciasLista" class="autocomplete-suggestions"></div>
+            </div>
+            <button onclick="agregarListaCompra()">Agregar a la lista</button>
+
+            <ul id="listaCompra"></ul>
+            <input type="checkbox" id="variosSupermercados"> Quiero hacer varios viajes
+            <input type="checkbox" id="considerarPrecioPeso"> Considerar pesos
+            <button onclick="calcularPrecios()">Calcular Mejor Opción</button>
+            <div id="resultado">
+                <h3 id="resultadoTotal"></h3>
+                <h3 id="ahorras"></h3>
+                <div id="detalleSupermercados"></div>
+            </div>
+        </div>
+
+
+        <div id="modal-ticket" class="modal">
+            <h2></h2>
+            <ul id="ticket"></ul>
+            <button onclick="cerrarModal()">&times;</button>
+        </div>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            mostrarListaCompra();
+        });
+
+        document.getElementById('productosNav').addEventListener('click', () => {
+            mostrarSeccion('productosContainer');
+            mostrarListaProductos();
+            cargarSupermercados();
+        });
+        document.getElementById('supermercadosNav').addEventListener('click', () => {
+            mostrarSeccion('supermercadosContainer');
+            mostrarListaSupermercados();
+        });
+        document.getElementById('listaNav').addEventListener('click', () => {
+            mostrarSeccion('listaCompraContainer');
+            mostrarListaCompra();
+            // Mientras no se pueda añadir productos a la lista desde otra sección
+            // esto no sería necesario;
+            // mostrarListaCompra();
+        });
+
+        let supermercadosAñadidos = obtenerSupermercadosAñadidos();
+        let listaProductos = obtenerProductosAñadidos();
+        let casillaVariosViajes = document.getElementById("variosSupermercados");
+        casillaVariosViajes.addEventListener('change', () => {
+            if (resultadoTotal.innerHTML !== '') {
+                limpiarResultado();
+                calcularPrecios();
+            }
+        });
+        let considerarPrecioPeso = document.getElementById("considerarPrecioPeso");
+        considerarPrecioPeso.addEventListener('change', () => {
+            if (resultadoTotal.innerHTML !== '') {
+                limpiarResultado();
+                calcularPrecios();
+            }
+        });
+        let listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+
+
+        function agregarSupermercado() {
+            let supermercado = document.getElementById("nuevoSupermercado").value.trim();
+            if (!supermercado) return;
+            let supermercados = JSON.parse(localStorage.getItem("supermercados")) || [];
+            if (!supermercados.includes(supermercado)) {
+                supermercados.push(supermercado);
+                localStorage.setItem("supermercados", JSON.stringify(supermercados));
+            }
+            document.getElementById("nuevoSupermercado").value = "";
+
+            for (let producto of listaCompra) {
+                productosConAlerta.push(producto.nombre);
+            }
+            mostrarListaSupermercados();
+        }
+
+        function cargarSupermercados() {
+            //Esta funcion añade los supermercados actuales al select de agregar y filtrar productos
+            // Referencias a los select
+            let selectAgregar = document.getElementById("supermercado");
+            let selectFiltro = document.getElementById("filtroSupermercado");
+
+            // Crear fragmentos para evitar múltiples reflow/repaints en el DOM
+            let fragmentAgregar = document.createDocumentFragment();
+            let fragmentFiltro = document.createDocumentFragment();
+
+            // Opción por defecto
+            let opcionAgregar = document.createElement("option");
+            opcionAgregar.value = "";
+            opcionAgregar.textContent = "Selecciona un supermercado";
+            fragmentAgregar.appendChild(opcionAgregar);
+
+            let opcionFiltro = document.createElement("option");
+            opcionFiltro.value = "";
+            opcionFiltro.textContent = "Todos los supermercados";
+            fragmentFiltro.appendChild(opcionFiltro);
+
+            // Añadir supermercados
+            supermercadosAñadidos.forEach(supermercado => {
+                let optionAgregar = document.createElement("option");
+                optionAgregar.value = supermercado;
+                optionAgregar.textContent = supermercado;
+                fragmentAgregar.appendChild(optionAgregar);
+
+                let optionFiltro = document.createElement("option");
+                optionFiltro.value = supermercado;
+                optionFiltro.textContent = supermercado;
+                fragmentFiltro.appendChild(optionFiltro);
+            });
+
+            // Reemplazar hijos de los select con los nuevos fragmentos
+            selectAgregar.replaceChildren(fragmentAgregar);
+            selectFiltro.replaceChildren(fragmentFiltro);
+        }
+
+
+        function agregarProducto() {
+            let producto = document.getElementById("producto").value.trim();
+            let supermercado = document.getElementById("supermercado").value;
+            let precio = parseFloat(document.getElementById("precio").value);
+            let peso = parseFloat(document.getElementById("peso").value);
+            let precioPorPeso = precio / peso;
+
+            if (!producto || !supermercado || isNaN(precio) || precio <= 0 || isNaN(peso) || peso <= 0) {
+                alert("Por favor, introduce datos válidos.");
+                return;
+            }
+
+
+            // Buscar si el producto ya está en el mismo supermercado
+            let productoExistente = listaProductos.find(item => item.producto === producto && item.supermercado === supermercado);
+
+            if (productoExistente) {
+                let mismoPrecio = productoExistente.precio === precio;
+                let mismoPeso = productoExistente.peso === peso
+                if (mismoPeso || mismoPrecio) {
+                    alert("Este producto ya está añadido con el mismo precio o peso.");
+                } else {
+                    alert(`El producto ya existe en ${supermercado}, pero con un precio o peso diferente (${productoExistente.precio}€ en lugar de ${precio}€ y ${productoExistente.peso}Kg/L en lugar de ${peso}Kg/L).`);
+
+                    // Si quisiera cambiar el precio igualmente:
+                    // productoExistente.precio = precio; // Actualizar el precio
+                    // localStorage.setItem("precios", JSON.stringify(listaProductos)); // Guardar los cambios
+
+                    //Si quisiera cambiar el peso igualmente:
+                    // Pendiente.
+                }
+            } else {
+                // Si no existe, añadirlo
+                listaProductos.push({ producto, supermercado, precio, peso, precioPorPeso });
+                localStorage.setItem("precios", JSON.stringify(listaProductos));
+            }
+
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
+            if (contadorSupermercados === supermercadosAñadidos.length) {
+                if (productosConAlerta.includes(producto)) {
+                    let indexProducto = productosConAlerta.indexOf(producto);
+                    if (indexProducto !== -1) {
+                        productosConAlerta.splice(indexProducto, 1);
+                    }
+                }
+            }
+
+            mostrarListaProductos();
+            limpiarResultado();
+
+
+            // Limpiar los campos después de agregar
+            document.getElementById("producto").value = "";
+            document.getElementById("precio").value = "";
+            document.getElementById("peso").value = "";
+            document.getElementById("sugerencias").innerHTML = "";
+        }
+
+        function mostrarListaProductos() {
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosContainer = document.getElementById("productos");
+
+            // Filtros
+            let filtroNombre = document.getElementById("filtroNombre").value.toLowerCase();
+            let filtroSupermercado = document.getElementById("filtroSupermercado").value;
+            let orden = document.getElementById("ordenarPor").value;
+
+            // Aplicar filtros
+            let productosFiltrados = lista.filter(item =>
+                item.producto.toLowerCase().includes(filtroNombre) &&
+                (filtroSupermercado === "" || item.supermercado === filtroSupermercado)
+            );
+
+            // Aplicar ordenación
+            if (orden === "nombre") {
+                productosFiltrados.sort((a, b) => a.producto.localeCompare(b.producto));
+            } else if (orden === "supermercado") {
+                productosFiltrados.sort((a, b) => a.supermercado.localeCompare(b.supermercado));
+            } else if (orden === "precio-asc") {
+                productosFiltrados.sort((a, b) => a.precio - b.precio);
+            } else if (orden === "precio-desc") {
+                productosFiltrados.sort((a, b) => b.precio - a.precio);
+            }
+
+            // Limpiar contenedor antes de renderizar
+            productosContainer.textContent = "";
+
+            const productosUnicos = new Set();
+
+            productosFiltrados.forEach((item, index) => {
+                if (item.peso === null || isNaN(item.peso)) return;
+
+                const key = `${item.slug}-${item.precio}-${item.peso}`;
+                if (productosUnicos.has(key)) return;
+                productosUnicos.add(key);
+
+                const card = document.createElement("div");
+                card.classList.add("product-card");
+
+                const img = document.createElement("img");
+                img.src = item.imagen;
+                img.alt = item.producto;
+
+                const title = document.createElement("h3");
+                title.textContent = item.producto;
+
+                const supermercado = document.createElement("p");
+                supermercado.textContent = `Supermercado: ${item.supermercado}`;
+
+                const price = document.createElement("p");
+                price.textContent = `Precio: ${item.precio.toFixed(2)} €`;
+
+                const weight = document.createElement("p");
+                weight.textContent = `Peso: ${item.peso.toFixed(2)} Kg/L`;
+
+                const pricePerWeight = document.createElement("p");
+                pricePerWeight.textContent = `Precio por Kg/L: ${item.precioPorPeso.toFixed(2)} €`;
+
+                const botonEliminar = document.createElement("button");
+                botonEliminar.textContent = "Eliminar";
+                botonEliminar.addEventListener("click", () => eliminarProducto(index));
+
+                card.appendChild(img);
+                card.appendChild(title);
+                card.appendChild(supermercado);
+                card.appendChild(price);
+                card.appendChild(weight);
+                card.appendChild(pricePerWeight);
+                card.appendChild(botonEliminar);
+
+                productosContainer.appendChild(card);
+            });
+        }
+
+
+
+
+
+
+
+
+        function mostrarSeccion(sectionId) {
+            let allSections = document.querySelectorAll('.section');
+            for (let section of allSections) {
+                if (section.id !== sectionId) {
+                    section.classList.add('hidden');
+                } else {
+                    section.classList.remove('hidden');
+                }
+            }
+            let allNavs = document.querySelectorAll('nav div');
+            for (let n of allNavs) {
+                n.classList.remove('selected');
+            }
+            let navId = sectionId.match(/^[a-z]+/)[0] + "Nav";
+            let nav = document.getElementById(navId);
+            nav.classList.add('selected');
+
+            if (sectionId !== 'supermercadosContainer') {
+                supermercadosAñadidos = obtenerSupermercadosAñadidos();
+            }
+            if (sectionId !== 'productosContainer') {
+                listaProductos = obtenerProductosAñadidos();
+            }
+        }
+
+
+        function mostrarListaSupermercados() {
+            let lista = JSON.parse(localStorage.getItem("supermercados")) || [];
+            let ul = document.querySelector("#supermercadosContainer ul");
+
+            //Limpiamos la lista
+            while (ul.firstChild) {
+                ul.removeChild(ul.firstChild);
+            }
+
+            lista.forEach((item, index) => {
+                let li = document.createElement('li');
+                li.textContent = item;
+                let eliminarSupermercadoBtn = document.createElement('button');
+                eliminarSupermercadoBtn.textContent = 'Eliminar';
+
+                // Detectar a que botón de eliminar se pulsa en lugar de asignar un evento a cada uno:
+                li.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'BUTTON') {
+                        let index = Array.from(e.target.parentElement.parentElement.children).indexOf(e.target.parentElement);
+                        eliminarSupermercado(index);
+                    }
+                });
+                //Asignar un evento distinto a cada uno (código peor):
+                // eliminarSupermercadoBtn.onclick = () => eliminarSupermercado(index);
+
+
+                ul.appendChild(li);
+                li.appendChild(eliminarSupermercadoBtn);
+            });
+        }
+
+        function eliminarProducto(index) {
+            const nombreProducto = listaProductos[index].producto;
+            for (let index = 0; index < listaCompra.length; index++) {
+                const element = listaCompra[index];
+                // Si el producto que elimino está en la lista de la compra...
+                if (element.nombre === nombreProducto) {
+                    if (!productosConAlerta.includes(nombreProducto)) {
+                        productosConAlerta.push(nombreProducto);
+                    }
+                    // Si no queda en ningún supermercado debo eliminarlo de la lista avisando al cliente
+                    let numeroSupermercados = cuantosSupermercadosTienenUnProducto(nombreProducto) - 1;
+                    if (numeroSupermercados <= 0) {
+                        alert('Se eliminará este producto de la lista de la compra');
+                        eliminarListaCompra(listaCompra.findIndex(item => item.nombre === nombreProducto));
+                    }
+                }
+            }
+
+            listaProductos.splice(index, 1);
+            localStorage.setItem("precios", JSON.stringify(listaProductos));
+
+            mostrarListaProductos();
+            limpiarResultado();
+
+        }
+
+        function eliminarSupermercado(index) {
+            let supermercadoAEliminar = supermercadosAñadidos[index];
+
+            // Eliminamos el supermercado de la lista
+            supermercadosAñadidos.splice(index, 1);
+            localStorage.setItem("supermercados", JSON.stringify(supermercadosAñadidos));
+            mostrarListaSupermercados();
+
+            let productoEliminado = false;
+
+            // Recorremos la lista al revés para evitar problemas de cambio de índices
+            for (let i = listaProductos.length - 1; i >= 0; i--) {
+                if (listaProductos[i].supermercado === supermercadoAEliminar) {
+                    if (!productoEliminado) {
+                        alert('Se eliminarán todos los productos asociados a este supermercado.');
+                        productoEliminado = true;
+                    }
+                    eliminarProducto(i); // Eliminamos el producto
+                }
+            }
+
+            for (let i = productosConAlerta.length - 1; i >= 0; i--) {
+                let producto = productosConAlerta[i];
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
+
+                if (contadorSupermercados === supermercadosAñadidos.length) {
+                    productosConAlerta.splice(i, 1);
+                }
+            }
+
+        }
+
+
+        // TOFIX: Si clico fuera de la sugerencia que se cierre, fusionar ambas funciones
+        function mostrarSugerencias() {
+            let input = document.getElementById("producto").value.toLowerCase();
+            let sugerenciasDiv = document.getElementById("sugerencias");
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosUnicos = [...new Set(lista.map(item => item.producto))];
+
+            sugerenciasDiv.innerHTML = "";
+            if (input.length === 0) return;
+
+            let sugerencias = productosUnicos.filter(prod => prod.toLowerCase().startsWith(input)).slice(0, 5);
+            sugerencias.forEach(sugerencia => {
+                let div = document.createElement("div");
+                div.textContent = sugerencia;
+                div.onclick = function () {
+                    document.getElementById("producto").value = sugerencia;
+                    sugerenciasDiv.innerHTML = "";
+                };
+                sugerenciasDiv.appendChild(div);
+            });
+        }
+
+        function mostrarSugerenciasLista() {
+            let input = document.getElementById("productoLista").value.trim().toLowerCase();
+            let sugerenciasDiv = document.getElementById("sugerenciasLista");
+            sugerenciasDiv.innerHTML = "";
+
+            if (!input) return;
+
+            let lista = JSON.parse(localStorage.getItem("precios")) || [];
+            let productosUnicos = [...new Set(lista.map(item => item.producto))];
+            let sugerencias = productosUnicos.filter(producto => producto.toLowerCase().startsWith(input));
+
+            sugerencias.forEach(producto => {
+                let div = document.createElement("div");
+                div.textContent = producto;
+                div.onclick = () => {
+                    document.getElementById("productoLista").value = producto;
+                    sugerenciasDiv.innerHTML = "";
+                };
+                sugerenciasDiv.appendChild(div);
+            });
+        }
+
+        // Mostrar lista de productos con cantidades
+        function mostrarListaCompra() {
+            let ul = document.getElementById("listaCompra");
+            ul.innerHTML = "";
+
+            if (productosConAlerta.length === 0) {
+                casillaVariosViajes.disabled = false;
+            }
+
+            // Mostrar cada producto con sus botones de + y - para la cantidad
+            listaCompra.forEach((producto, index) => {
+                let li = document.createElement("li");
+
+                // Nombre del producto
+                let nombreProducto = document.createElement("span");
+                nombreProducto.textContent = `${producto.nombre}`;
+
+                let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto.nombre);
+
+                if (contadorSupermercados < supermercadosAñadidos.length) {
+                    if (!productosConAlerta.includes(producto.nombre)) {
+                        productosConAlerta.push(producto.nombre);
+                    }
+                } // else if (!comprobarProductoEnProductosConAlerta(producto.nombre)) {
+                //     let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
+                //     productosConAlerta.splice(indexProducto);
+                // }
+
+                if (comprobarProductoEnProductosConAlerta(producto.nombre)) {
+                    li.classList.add('warning');
+                    casillaVariosViajes.checked = true;
+                    casillaVariosViajes.disabled = true;
+                }
+
+                let divCantidades = document.createElement('div');
+                divCantidades.classList.add('divCantidades');
+
+                // Contador de cantidad
+                let cantidad = document.createElement("span");
+                cantidad.textContent = `${producto.cantidad}`;
+
+                // Botones de cantidad
+                let btnDisminuir = document.createElement("button");
+                btnDisminuir.innerHTML = "&#10134;";
+                btnDisminuir.addEventListener('click', () => {
+                    modificarCantidad(index, -1)
+                    if (resultadoTotal.innerHTML !== '') {
+                        limpiarResultado();
+                        calcularPrecios();
+                    }
+                });
+
+                let btnAumentar = document.createElement("button");
+                btnAumentar.innerHTML = "&#10133;";
+                btnAumentar.addEventListener('click', () => {
+                    modificarCantidad(index, 1)
+                    if (resultadoTotal.innerHTML !== '') {
+                        limpiarResultado();
+                        calcularPrecios();
+                    }
+                });
+
+                // Botón de eliminar
+                let btnEliminar = document.createElement("button");
+                btnEliminar.textContent = "Eliminar";
+                btnEliminar.classList.add('eliminarDeLista');
+                btnEliminar.onclick = () => eliminarListaCompra(index);
+
+                // Añadir los elementos al <li>
+                li.appendChild(nombreProducto);
+                li.appendChild(divCantidades);
+                divCantidades.appendChild(btnDisminuir);
+                divCantidades.appendChild(cantidad);
+                divCantidades.appendChild(btnAumentar);
+                li.appendChild(btnEliminar);
+
+                ul.appendChild(li);
+            });
+        }
+
+
+        let productosConAlerta = [];
+        // Función para agregar un producto a la lista
+        function agregarListaCompra() {
+            let producto = document.getElementById("productoLista").value.trim();
+            if (!producto) return;
+
+            // Comprueba en cuantos supermercados hemos añadido ese producto
+            let contadorSupermercados = cuantosSupermercadosTienenUnProducto(producto);
+
+            if (contadorSupermercados === 0) {
+                alert('Ese producto no está en la lista');
+                return;
+            } else if (contadorSupermercados < supermercadosAñadidos.length) {
+                if (productosConAlerta.length === 0) {
+                    alert('Ese producto no está en todos los supermercados, deberás hacer varios viajes.');
+                }
+                if (!productosConAlerta.includes(producto)) {
+                    productosConAlerta.push(producto);
+                }
+            }
+
+            listaCompra = JSON.parse(localStorage.getItem("listaCompra")) || [];
+
+            // Comprobar si el producto ya existe en la lista
+            let productoExistente = listaCompra.find(item => item.nombre.toLowerCase() === producto.toLowerCase());
+            if (productoExistente) {
+                // Si el producto ya existe, solo aumentar la cantidad
+                productoExistente.cantidad++;
+            } else {
+                // Si el producto no existe, agregarlo con cantidad 1
+                listaCompra.push({ nombre: producto, cantidad: 1 });
+            }
+
+            localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+
+            document.getElementById("productoLista").value = "";
+            document.getElementById("sugerenciasLista").innerHTML = "";
+            mostrarListaCompra();
+            limpiarResultado();
+        }
+
+        // Función para eliminar un producto de la lista
+        function eliminarListaCompra(index) {
+
+            if (comprobarProductoEnProductosConAlerta(listaCompra[index].nombre)) {
+                // alert('quito la alerta');
+                casillaVariosViajes.disabled = false;
+                let indexProducto = productosConAlerta.indexOf(listaCompra[index].nombre);
+                if (indexProducto !== -1) {
+                    productosConAlerta.splice(indexProducto, 1);
+                }
+            }
+
+            listaCompra.splice(index, 1);
+            localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+            mostrarListaCompra();
+            limpiarResultado();
+        }
+
+        // Función para modificar la cantidad de un producto
+        function modificarCantidad(index, cambio) {
+            let producto = listaCompra[index];
+
+            // Si el cambio es negativo y la cantidad es 1 o más, disminuir
+            if (producto.cantidad + cambio > 0) {
+                producto.cantidad += cambio;
+                localStorage.setItem("listaCompra", JSON.stringify(listaCompra));
+                mostrarListaCompra();
+            } else {
+                eliminarListaCompra(listaCompra.indexOf(producto));
+            }
+        }
+
+
+        let supermercados;
+        let mejoresOpcionesPorSupermercado;
+        let precioTotal;
+        let pesoTotal;
+        let precioPorPesoTotal;
+
+        function calcularPrecios() {
+            let variosSupermercados = casillaVariosViajes.checked;
+            let precioMasBajoUnViaje;
+
+            mejoresOpcionesPorSupermercado = calcularMejoresOpcionesPorSupermercado();
+
+            // Para saber el total que se gastaría
+            calcularPreciosVariosViajes();
+            // Para saber el total que se gastaría en el super que sale más barato
+            precioMasBajoUnViaje = encontrarPrecioMasBajoUnViaje(calcularPreciosUnViaje()).precio;
+
+            //Asigno precios en función de la casilla marcada
+            supermercados = variosSupermercados ? calcularPreciosVariosViajes() : calcularPreciosUnViaje();
+            // Ordeno los supermercados de más baratos a más caros
+            let ordenados;
+            if (considerarPrecioPeso.checked) {
+                ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioPorPeso - b[1].precioPorPeso);
+            } else {
+                ordenados = Object.entries(supermercados).sort((a, b) => a[1].precioNormal - b[1].precioNormal);
+            }
+            if (variosSupermercados) {
+                document.getElementById("resultadoTotal").innerText = `Total compra: ${(precioTotal).toFixed(2)}€ y ${(pesoTotal).toFixed(2)}Kg/L (Precio/Kilo: ${(precioTotal / pesoTotal).toFixed(2)}€)`;
+                document.getElementById("ahorras").innerText = productosConAlerta.length === 0 ? `Haciendo varios viajes ahorras: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€` : '';
+            } else {
+                if (considerarPrecioPeso.checked) {
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€ y ${ordenados[0][1].peso}Kg/L (Precio/Kilo: €${(ordenados[0][1].precioNormal / ordenados[0][1].peso).toFixed(2)})` : "No hay suficientes datos para calcular.";
+                } else {
+                    document.getElementById("resultadoTotal").innerText = ordenados.length > 0 ? `Mejor opción: ${ordenados[0][0]} con un total de ${ordenados[0][1].precioNormal.toFixed(2)}€` : "No hay suficientes datos para calcular.";
+                }
+                document.getElementById("ahorras").innerText = `Si hicieses varios viajes ahorrarías: ${(precioMasBajoUnViaje - precioTotal).toFixed(2)}€`;
+            }
+
+            let detalle = "<h3>Precios por supermercado:</h3>";
+
+            ordenados.forEach(([supermercado, total]) => {
+                let totalNormal = total.precioNormal;
+                let totalPeso = total.peso
+                if (variosSupermercados) {
+                    detalle += `<li><button onclick="mostrarModal('${supermercado}',${totalNormal})"">${supermercado}</button>: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L</li>`;
+                } else {
+                    if (considerarPrecioPeso.checked) {
+                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)} | Peso: ${totalPeso.toFixed(2)}Kg/L | Precio/Kilo: €${(totalNormal / totalPeso).toFixed(2)}</li>`;
+                    } else {
+                        detalle += `<li>${supermercado}: €${totalNormal.toFixed(2)}</li>`;
+                    }
+                }
+            });
+
+            document.getElementById("detalleSupermercados").innerHTML = detalle;
+        }
+
+        function mostrarModal(supermercado, totalSupermercado) {
+            let ul = document.getElementById("ticket");
+            ul.innerHTML = "";
+
+            let h3 = document.querySelector('#modal-ticket h2');
+            h3.textContent = supermercado;
+
+            // Crear encabezado (una sola vez)
+            let encabezado = document.createElement("li");
+            encabezado.innerHTML = `
+                <span><strong>Producto</strong></span>
+                <span><strong>Cant.</strong></span>
+                <span><strong>Unitario</strong></span>
+                <span><strong>Subtotal</strong></span>
+            `;
+            ul.appendChild(encabezado);
+
+            // Declarar total
+            const total = totalSupermercado.toFixed(2);
+
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
+                let mejorPrecio;
+                let mejorSuper;
+
+                if (considerarPrecioPeso.checked) {
+                    mejorPrecio = Math.min(...preciosProducto.map(item => item.precioPorPeso));
+                    mejorSuper = preciosProducto.find(item => item.precioPorPeso === mejorPrecio).supermercado;
+                } else {
+                    mejorPrecio = Math.min(...preciosProducto.map(item => item.precio));
+                    mejorSuper = preciosProducto.find(item => item.precio === mejorPrecio).supermercado;
+                }
+
+                if (mejorSuper === supermercado) {
+                    let li = document.createElement("li");
+
+                    let cantidad = listaCompra.find(item => item.nombre === producto.nombre)?.cantidad || 1;
+                    let precioUnitario = preciosProducto.find(item => item.supermercado === supermercado)?.precio || 0;
+                    let subtotal = precioUnitario * cantidad;
+
+
+                    li.innerHTML = `
+                <span>${producto.nombre}</span>
+                <span>X${cantidad}</span>
+                <span>${precioUnitario.toFixed(2)}€</span>
+                <span>${subtotal.toFixed(2)}€</span>
+            `;
+                    ul.appendChild(li);
+                }
+            });
+
+            // Agregar línea de total
+            let totalRow = document.createElement("li");
+            totalRow.innerHTML = `
+                <span><strong>Total</strong></span>
+                <span></span>
+                <span></span>
+                <span><strong>${total}€</strong></span>
+            `;
+            ul.appendChild(totalRow);
+
+            document.getElementById("modal-ticket").classList.add("active");
+        }
+
+
+
+        function cerrarModal() {
+            document.getElementById("modal-ticket").classList.remove("active");
+        }
+
+        function calcularPreciosUnViaje() {
+            let supermercados = {};
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
+                preciosProducto.forEach(({ supermercado, precio, peso, precioPorPeso }) => {
+                    let cantidad = producto.cantidad || 1; // Usar la cantidad almacenada en el producto
+                    if (!supermercados[supermercado]) {
+                        supermercados[supermercado] = {
+                            precioNormal: 0,
+                            precioPorPeso: 0,
+                            peso: 0
+                        };
+                    }
+                    supermercados[supermercado].precioNormal += precio * cantidad; // Multiplicar por la cantidad
+                    supermercados[supermercado].precioPorPeso += precioPorPeso * cantidad; // Multiplicar por la cantidad
+                    supermercados[supermercado].peso += peso * cantidad; // Multiplicar por la cantidad
+                });
+            });
+            return supermercados;
+        }
+
+
+        function calcularPreciosVariosViajes() {
+            supermercados = {};
+            precioTotal = 0;
+            pesoTotal = 0;
+            precioPorPesoTotal = 0;
+
+            Object.entries(mejoresOpcionesPorSupermercado).forEach(([producto, { supermercado, precio, peso, precioPorPeso }]) => {
+                if (!supermercados[supermercado]) {
+                    supermercados[supermercado] = {
+                        precioNormal: 0,
+                        precioPorPeso: 0,
+                        peso: 0
+                    };
+                }
+                let cantidad = listaCompra.find(item => item.nombre === producto)?.cantidad || 1;
+                let precioASumar = precio * cantidad;
+                let precioPorPesoASumar = precioPorPeso * cantidad;
+                let pesoASumar = peso * cantidad;
+                supermercados[supermercado].precioNormal += precioASumar;
+                supermercados[supermercado].precioPorPeso += precioPorPesoASumar;
+                supermercados[supermercado].peso += pesoASumar;
+                precioTotal += parseFloat(precioASumar);
+                pesoTotal += parseFloat(pesoASumar);
+                precioPorPesoTotal += parseFloat(precioPorPesoASumar);
+            });
+            return supermercados;
+        }
+
+        function calcularMejoresOpcionesPorSupermercado() {
+            mejoresOpcionesPorSupermercado = {};
+            listaCompra.forEach(producto => {
+                let preciosProducto = listaProductos.filter(item => item.producto === producto.nombre);
+
+                preciosProducto.forEach(({ supermercado, precio, peso, precioPorPeso }) => {
+                    if (!considerarPrecioPeso.checked) {
+                        if (!mejoresOpcionesPorSupermercado[producto.nombre] || precio < mejoresOpcionesPorSupermercado[producto.nombre].precio) {
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, peso, precioPorPeso };
+                        }
+                    } else {
+                        if (!mejoresOpcionesPorSupermercado[producto.nombre] || precioPorPeso < mejoresOpcionesPorSupermercado[producto.nombre].precioPorPeso) {
+                            mejoresOpcionesPorSupermercado[producto.nombre] = { supermercado, precio, peso, precioPorPeso };
+                        }
+                    }
+                });
+
+            });
+            return mejoresOpcionesPorSupermercado;
+        }
+
+        function encontrarPrecioMasBajoUnViaje(supermercados) {
+            let supermercadoMasBarato = null;
+            let precioMasBajo = Infinity;
+            Object.entries(supermercados).forEach(([supermercado, precios]) => {
+                if (considerarPrecioPeso.checked) {
+                    if (precios.precioPorPeso < precioMasBajo) {
+                        precioMasBajo = precios.precioNormal;
+                        supermercadoMasBarato = supermercado;
+                    }
+                } else {
+                    if (precios.precioNormal < precioMasBajo) {
+                        precioMasBajo = precios.precioNormal;
+                        supermercadoMasBarato = supermercado;
+                    }
+                }
+
+            });
+
+            return { supermercado: supermercadoMasBarato, precio: precioMasBajo };
+        }
+
+
+        function obtenerSupermercadosAñadidos() {
+            return JSON.parse(localStorage.getItem("supermercados")) || [];
+        }
+
+        function obtenerProductosAñadidos() {
+            return JSON.parse(localStorage.getItem("precios")) || [];
+        }
+
+        function comprobarProductoEnProductosConAlerta(producto) {
+            for (let productoConAlerta of productosConAlerta) {
+                if (productoConAlerta === producto) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function cuantosSupermercadosTienenUnProducto(producto) {
+            // Comprueba en cuantos supermercados hemos añadido ese producto
+            let contadorSupermercados = 0;
+            for (let productoLista of listaProductos) {
+                if (productoLista.producto === producto) {
+                    contadorSupermercados += 1;
+                }
+            }
+
+            return contadorSupermercados;
+        }
+
+        function limpiarResultado() {
+            let elementos = ["resultadoTotal", "ahorras", "detalleSupermercados"];
+
+            elementos.forEach(id => {
+                let elemento = document.getElementById(id);
+                while (elemento.firstChild) {
+                    elemento.removeChild(elemento.firstChild);
+                }
+            });
+        }
+
+
+
+        // INTEGRACIÓN CON BASE DE DATOS --------------------------
+
+        function cargarProductosMercadona() {
+            fetch('php/mercadona/obtener_productos_mercadona.php')
+                .then(response => response.json())
+                .then(data => {
+                    const productosUnicos = new Set();
+                    const listaProductos = [];
+
+                    data.forEach(producto => {
+                        const key = `${producto.slug}-${producto.precio}-${producto.peso}`;
+
+                        if (!productosUnicos.has(key)) {
+                            productosUnicos.add(key);
+                            console.log(producto.peso);
+                            const precio = parseFloat(producto.precio);
+                            const peso = parseFloat(producto.peso);
+                            const precioPorPeso = (peso > 0) ? (precio / peso) : 0;
+
+                            listaProductos.push({
+                                producto: producto.nombre,
+                                imagen: producto.imagen,
+                                supermercado: "Mercadona",
+                                precio: precio,
+                                peso: peso,
+                                precioPorPeso: precioPorPeso
+                            });
+                        }
+                    });
+
+                    // Guardar en localStorage
+                    localStorage.setItem("precios", JSON.stringify(listaProductos));
+                    console.log("Productos de Mercadona guardados en localStorage:", listaProductos);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+
+    </script>
+
+</body>
+
+</html>
