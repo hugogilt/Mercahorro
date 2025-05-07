@@ -1552,8 +1552,8 @@
                             productosUnicos.add(key);
 
                             const precio = parseFloat(producto.precio);
-                            const peso = extraerPesoDesdeDescripcion(producto.descripcion); // función auxiliar
-                            const precioPorPeso = (peso > 0) ? (precio / peso) : 0;
+                            const precioPorPeso = parseFloat(producto.precio_kilo);
+                            const peso = precio/precioPorPeso;
 
                             listaProductos.push({
                                 producto: producto.nombre,
