@@ -880,7 +880,7 @@
                 price.textContent = `Precio: ${item.precio.toFixed(2)} €`;
 
                 const weight = document.createElement("p");
-                weight.textContent = `Peso: ${item.peso.toFixed(2)} Kg/L`;
+                weight.textContent = `Peso: ${formatearPeso(item.peso)} Kg/L`;
 
                 const pricePerWeight = document.createElement("p");
                 pricePerWeight.textContent = `Precio por Kg/L: ${item.precioPorPeso.toFixed(2)} €`;
@@ -1481,6 +1481,24 @@
                     elemento.removeChild(elemento.firstChild);
                 }
             });
+        }
+
+
+
+
+        function formatearPeso(peso) {
+            const str = peso.toString();
+
+            if (str.includes('.')) {
+                const decimales = str.split('.')[1].length;
+                if (decimales <= 2) {
+                    return peso.toFixed(2);
+                } else {
+                    return peso.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+                }
+            } else {
+                return peso.toFixed(2);
+            }
         }
 
 
