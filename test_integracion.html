@@ -1510,14 +1510,12 @@
                 .then(response => response.json())
                 .then(data => {
                     const productosUnicos = new Set();
-                    const listaProductos = [];
 
                     data.forEach(producto => {
                         const key = `${producto.slug}-${producto.precio}-${producto.peso}`;
 
                         if (!productosUnicos.has(key)) {
                             productosUnicos.add(key);
-                            console.log(producto.peso);
                             const precio = parseFloat(producto.precio);
                             const peso = parseFloat(producto.peso);
                             const precioPorPeso = (peso > 0) ? (precio / peso) : 0;
@@ -1539,6 +1537,71 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+
+        function cargarProductosConsum() {
+            fetch('php/consum/obtener_productos_consum.php')
+                .then(response => response.json())
+                .then(data => {
+                    const productosUnicos = new Set();
+
+                    data.forEach(producto => {
+                        const key = `${producto.slug}-${producto.precio}-${producto.descripcion}`;
+
+                        if (!productosUnicos.has(key)) {
+                            productosUnicos.add(key);
+
+                            const precio = parseFloat(producto.precio);
+                            const peso = extraerPesoDesdeDescripcion(producto.descripcion); // función auxiliar
+                            const precioPorPeso = (peso > 0) ? (precio / peso) : 0;
+
+                            listaProductos.push({
+                                producto: producto.nombre,
+                                imagen: producto.imagen,
+                                supermercado: "Consum",
+                                precio: precio,
+                                peso: peso,
+                                precioPorPeso: precioPorPeso
+                            });
+                        }
+                    });
+
+                    localStorage.setItem("precios", JSON.stringify(listaProductos));
+                    console.log("Productos de Consum guardados en localStorage:", listaProductos);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Función auxiliar para extraer el peso desde la descripción (en gramos o mililitros)
+        function extraerPesoDesdeDescripcion(descripcion) {
+            const regex = /(\d+(?:[\.,]\d+)?)(\s*)(kg|g|gr|gramos|ml|l)\b/i;
+            const match = descripcion.match(regex);
+
+            if (match) {
+                let cantidad = parseFloat(match[1].replace(',', '.'));
+                const unidad = match[3].toLowerCase();
+
+                switch (unidad) {
+                    case 'kg':
+                        return cantidad;       // Ya está en kilogramos
+                    case 'l':
+                        return cantidad;       // Lo tratamos como 1L = 1kg (para agua u otros líquidos)
+                    case 'ml':
+                        return cantidad / 1000; // 1000ml = 1L = 1kg, por lo que lo convertimos a kg
+                    case 'g':
+                    case 'gr':
+                    case 'gramos':
+                        return cantidad / 1000; // 1000g = 1kg
+                    default:
+                        return 0;
+                }
+            }
+
+            console.warn("No se encontró peso en descripción:", descripcion);
+            return 0;
+        }
+
+
 
 
 
