@@ -1572,34 +1572,54 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        // Función auxiliar para extraer el peso desde la descripción (en gramos o mililitros)
         function extraerPesoDesdeDescripcion(descripcion) {
-            const regex = /(\d+(?:[\.,]\d+)?)(\s*)(kg|g|gr|gramos|ml|l)\b/i;
-            const match = descripcion.match(regex);
+            // Primero buscamos si hay formato tipo "3 x 56 g", "2x500ml", etc.
+            const regexMultiplicador = /(\d+)\s*[xX]\s*(\d+(?:[\.,]\d+)?)(\s*)(kg|g|gr|gramos|ml|l)\b/i;
+            const regexSimple = /(\d+(?:[\.,]\d+)?)(\s*)(kg|g|gr|gramos|ml|l)\b/i;
 
-            if (match) {
-                let cantidad = parseFloat(match[1].replace(',', '.'));
-                const unidad = match[3].toLowerCase();
+            let cantidad = 0;
 
-                switch (unidad) {
-                    case 'kg':
-                        return cantidad;       // Ya está en kilogramos
-                    case 'l':
-                        return cantidad;       // Lo tratamos como 1L = 1kg (para agua u otros líquidos)
-                    case 'ml':
-                        return cantidad / 1000; // 1000ml = 1L = 1kg, por lo que lo convertimos a kg
-                    case 'g':
-                    case 'gr':
-                    case 'gramos':
-                        return cantidad / 1000; // 1000g = 1kg
-                    default:
-                        return 0;
+            if (regexMultiplicador.test(descripcion)) {
+                const match = descripcion.match(regexMultiplicador);
+                if (match) {
+                    const unidades = parseInt(match[1]);
+                    const valorUnitario = parseFloat(match[2].replace(',', '.'));
+                    const unidad = match[4].toLowerCase();
+
+                    cantidad = unidades * valorUnitario;
+
+                    switch (unidad) {
+                        case 'kg': return cantidad;
+                        case 'l': return cantidad;
+                        case 'ml': return cantidad / 1000;
+                        case 'g':
+                        case 'gr':
+                        case 'gramos': return cantidad / 1000;
+                        default: return 0;
+                    }
+                }
+            } else if (regexSimple.test(descripcion)) {
+                const match = descripcion.match(regexSimple);
+                if (match) {
+                    cantidad = parseFloat(match[1].replace(',', '.'));
+                    const unidad = match[3].toLowerCase();
+
+                    switch (unidad) {
+                        case 'kg': return cantidad;
+                        case 'l': return cantidad;
+                        case 'ml': return cantidad / 1000;
+                        case 'g':
+                        case 'gr':
+                        case 'gramos': return cantidad / 1000;
+                        default: return 0;
+                    }
                 }
             }
 
             console.warn("No se encontró peso en descripción:", descripcion);
             return 0;
         }
+
 
 
 
