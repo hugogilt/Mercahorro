@@ -1200,6 +1200,102 @@
     }
   },
   {
+    "nombre": "Pañuelos de papel Extra Suaves Caja Marca Blanca",
+    "consum": {
+      "id": 7666,
+      "nombre": "Pañuelos Faciales Dos Capas CONSUM",
+      "precio": 1.25,
+      "precio_kilo": 0.01,
+      "slug": "panuelos-faciales-dos-capas",
+      "descripcion": "Pañuelos Faciales Dos Capas 200 U",
+      "imagen": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7228633.jpg?t=20250603082416",
+      "ofertaPack": false,
+      "unidadesPack": null,
+      "precioUnidadPack": null,
+      "unidadPorPeso": "1 U"
+    },
+    "mercadona": {
+      "nombre": "Pañuelos de papel Extra Suaves Bosque Verde Caja",
+      "precio": "1.25",
+      "slug": "panuelos-papel-extra-suaves-bosque-verde-2-capas-caja",
+      "peso": 200,
+      "imagen": "https://prod-mercadona.imgix.net/images/ee570e175d6894f08bb89c0c35c2e6ee.jpg?fit=crop&h=300&w=300",
+      "unidades": null
+    }
+  },
+  {
+    "nombre": "Pañuelos de papel Aloe Vera Paquete Marca Blanca",
+    "consum": {
+      "id": 17021,
+      "nombre": "Pañuelo Compacto Aloe Cuatro Capas CONSUM",
+      "precio": 1.79,
+      "precio_kilo": 0.18,
+      "slug": "panuelo-compacto-aloe-cuatro-capas",
+      "descripcion": "Pañuelo Compacto Aloe Cuatro Capas 10 U",
+      "imagen": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7290450.jpg?t=20250603082513",
+      "ofertaPack": false,
+      "unidadesPack": null,
+      "precioUnidadPack": null,
+      "unidadPorPeso": "1 U"
+    },
+    "mercadona": {
+      "nombre": "Pañuelos de papel Aloe Vera Bosque Verde Paquete",
+      "precio": "1.60",
+      "slug": "panuelos-papel-aloe-vera-bosque-verde-4-capas-paquete",
+      "peso": 10,
+      "imagen": "https://prod-mercadona.imgix.net/images/7511317815798a118d92064761a95d4b.jpg?fit=crop&h=300&w=300",
+      "unidades": null
+    }
+  },
+  {
+    "nombre": "Pañuelos de papel Extra Suaves Paquete Marca Blanca",
+    "consum": {
+      "id": 16274,
+      "nombre": "Pañuelo Compacto Cuatro Capas CONSUM",
+      "precio": 1.15,
+      "precio_kilo": 0.12,
+      "slug": "panuelo-compacto-cuatro-capas",
+      "descripcion": "Pañuelo Compacto Cuatro Capas 10 U",
+      "imagen": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7290443.jpg?t=20250603082513",
+      "ofertaPack": false,
+      "unidadesPack": null,
+      "precioUnidadPack": null,
+      "unidadPorPeso": "1 U"
+    },
+    "mercadona": {
+      "nombre": "Pañuelos de papel Extra Suaves Bosque Verde Paquete",
+      "precio": "1.05",
+      "slug": "panuelos-papel-extra-suaves-bosque-verde-4-capas-paquete",
+      "peso": 10,
+      "imagen": "https://prod-mercadona.imgix.net/images/b001c95167feeae760dbd0449be877e8.jpg?fit=crop&h=300&w=300",
+      "unidades": null
+    }
+  },
+  {
+    "nombre": "Pañuelos de papel Mentol Paquete Marca Blanca",
+    "consum": {
+      "id": 17020,
+      "nombre": "Pañuelo Compacto Mentol Cuatro Capas CONSUM",
+      "precio": 1.8,
+      "precio_kilo": 0.18,
+      "slug": "panuelo-compacto-mentol-cuatro-capas",
+      "descripcion": "Pañuelo Compacto Mentol Cuatro Capas 10 U",
+      "imagen": "https://cdn-consum.aktiosdigitalservices.com/tol/consum/media/product/img/300x300/7290448.jpg?t=20250603082513",
+      "ofertaPack": false,
+      "unidadesPack": null,
+      "precioUnidadPack": null,
+      "unidadPorPeso": "1 U"
+    },
+    "mercadona": {
+      "nombre": "Pañuelos de papel Mentol Bosque Verde Paquete",
+      "precio": "1.80",
+      "slug": "panuelos-papel-mentol-bosque-verde-4-capas-paquete",
+      "peso": 10,
+      "imagen": "https://prod-mercadona.imgix.net/images/a9d46a080d602b04ce55132552ad4875.jpg?fit=crop&h=300&w=300",
+      "unidades": null
+    }
+  },
+  {
     "nombre": "Filete de salmón Bandeja",
     "consum": {
       "id": 33959,
